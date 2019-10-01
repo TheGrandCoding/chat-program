@@ -6,8 +6,10 @@ using System.Windows.Forms;
 
 namespace ChatProgram
 {
-    static class Program
+    public static class Program
     {
+        public static bool IsServer { get; set; } = false;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
