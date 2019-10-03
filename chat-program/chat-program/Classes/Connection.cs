@@ -10,6 +10,10 @@ namespace ChatProgram.Classes
 {
     public class Connection
     {
+        public Connection()
+        {
+            Client = new TcpClient(AddressFamily.InterNetwork);
+        }
         public TcpClient Client { get; set; }
 
         public event EventHandler<string> Receieved;

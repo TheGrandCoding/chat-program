@@ -1,5 +1,4 @@
-﻿using ChatProgram.Interfaces;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +12,10 @@ namespace ChatProgram.Classes
         public uint Id { get; set; }
         public string Name { get; set; }
 
-        public override JsonEntity FromJson(JObject json)
+        public override void FromJson(JObject json)
         {
-            throw new NotImplementedException();
+            Id = json["id"].ToObject<uint>();
+            Name = json["name"].ToObject<string>();
         }
 
         public override JObject ToJson()

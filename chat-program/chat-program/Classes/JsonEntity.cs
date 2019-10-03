@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatProgram.Interfaces
+namespace ChatProgram.Classes
 {
     public abstract class JsonEntity
     {
         public abstract JObject ToJson();
         
-        public abstract JsonEntity FromJson(JObject json);
+        public abstract void FromJson(JObject json);
     }
 }

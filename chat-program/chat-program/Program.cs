@@ -10,6 +10,8 @@ namespace ChatProgram
     {
         public static bool IsServer { get; set; } = false;
 
+        public const int Port = 6098;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

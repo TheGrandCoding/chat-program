@@ -1,5 +1,4 @@
-﻿using ChatProgram.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,12 +14,11 @@ namespace ChatProgram.Classes
         public User Author { get; set; }
         public string Content { get; set; }
 
-        public override JsonEntity FromJson(JObject json)
+        public override void FromJson(JObject json)
         {
             Content = json["content"].ToObject<string>();
             Id = json["id"].ToObject<uint>();
             Author = Common.GetUser(json["author"].ToObject<uint>());
-            return this;
         }
 
         public override JObject ToJson()

@@ -54,6 +54,7 @@
     <Compile Include="Classes\Packet.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Classes\JsonEntity.cs" />
+    <Compile Include="Client\ClientConnection.cs" />
     <Compile Include="Client\ClientForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,13 +70,13 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\ConnectionManager.cs" />
     <Compile Include="Server\ServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Server\ServerForm.Designer.cs">
       <DependentUpon>ServerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Server\ServerNetworkManager.cs" />
     <EmbeddedResource Include="Menu.resx">
       <DependentUpon>Menu.cs</DependentUpon>
     </EmbeddedResource>
