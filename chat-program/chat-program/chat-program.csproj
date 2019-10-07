@@ -49,8 +49,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Builders\CommandBuilder.cs" />
+    <Compile Include="Commands\Builders\ModuleBuilder.cs" />
+    <Compile Include="Commands\Builders\ParamaterBuilder.cs" />
+    <Compile Include="Commands\CommandContext.cs" />
     <Compile Include="Classes\Connection.cs" />
     <Compile Include="Classes\Message.cs" />
+    <Compile Include="Commands\CommandError.cs" />
+    <Compile Include="Commands\CommandService.cs" />
+    <Compile Include="Commands\Info\CommandInfo.cs" />
+    <Compile Include="Commands\Info\ParamaterInfo.cs" />
+    <Compile Include="Commands\ModuleBase.cs" />
     <Compile Include="Classes\Packet.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Classes\JsonEntity.cs" />
@@ -61,6 +70,10 @@
     <Compile Include="Client\ClientForm.Designer.cs">
       <DependentUpon>ClientForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Commands\Info\ModuleInfo.cs" />
+    <Compile Include="Commands\Results\IResult.cs" />
+    <Compile Include="Commands\TypeReader.cs" />
+    <Compile Include="Commands\Results\TypeReaderResult.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Menu.cs">
       <SubType>Form</SubType>
@@ -70,6 +83,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\CommandHandler.cs" />
     <Compile Include="Server\ConnectionManager.cs" />
     <Compile Include="Server\ServerForm.cs">
       <SubType>Form</SubType>
@@ -106,6 +120,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Server\Commands\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
