@@ -42,6 +42,7 @@ namespace ChatProgram.Classes
         UserLeft,
         UserList,
         MessageEdited,
+        GiveIdentity,
         // From-Client Packets
         Connect,
         Disconnect,

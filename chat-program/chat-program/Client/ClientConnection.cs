@@ -12,23 +12,43 @@ namespace ChatProgram.Client
 {
     public class ClientConnection : Connection
     {
+        ClientForm Form;
         public event EventHandler<Message> NewMessage;
         public event EventHandler<User> NewUser;
         public event EventHandler<User> UserDisconnected;
+        public event EventHandler<User> IdentityKnown;
 
-        public ClientConnection()
+        public User CurrentUser;
+
+        public ClientConnection(ClientForm form)
         {
+            Form = form;
             base.Receieved += parseJson;
         }
 
         void parseJson(object sender, string json)
         {
+            Logger.LogMsg("Recievd: " + json);
             var packet = new Packet(json);
             if (packet.Id == PacketId.NewMessage)
             {
                 var msg = new Message();
                 msg.FromJson(packet.Information);
-                NewMessage?.Invoke(this, msg);
+
+                Form.Invoke(new Action(() =>
+                {
+                    NewMessage?.Invoke(this, msg);
+                }));
+            } else if (packet.Id == PacketId.GiveIdentity)
+            {
+                var usr = new User();
+                usr.FromJson(packet.Information);
+                this.CurrentUser = usr;
+
+                Form.Invoke(new Action(() =>
+                {
+                    IdentityKnown?.Invoke(this, usr);
+                }));
             }
         }
     }

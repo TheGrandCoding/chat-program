@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 namespace ChatProgram
 {
@@ -30,6 +31,21 @@ namespace ChatProgram
             Client.Connect(IPAddress.Parse("127.0.0.1"));
             Client.Show();
             this.Hide();
+        }
+
+        private void btnJoin_Click(object sender, EventArgs e)
+        {
+            Client = new Client.ClientForm();
+            string input = Interaction.InputBox("Enter ze IP", "Schnell", "127.0.0.1");
+            if(IPAddress.TryParse(input, out var address))
+            {
+                Client.Connect(address);
+                Client.Show();
+                this.Hide();
+            } else
+            {
+                MessageBox.Show("IPAddress could not be parsed from your input.\nPerhaps try to read the prompt next time, eh?");
+            }
         }
     }
 }

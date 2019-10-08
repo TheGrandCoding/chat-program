@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms;
 
 namespace ChatProgram
 {
@@ -32,13 +33,20 @@ namespace ChatProgram
             LogMsg(logM);
         }
 
+        static object LOCK = new object();
         public static void LogMsg(LogMessage msg)
         {
-            Console.WriteLine(msg.ToString());
-            try
+            lock(LOCK)
             {
-                File.AppendAllText($"{DateTime.Now.Year.ToString("0000")}-{DateTime.Now.Month.ToString("00")}-{DateTime.Now.Day.ToString("00")}", msg.ToString() + "\n");
-            } catch { }
+                Console.WriteLine(msg.ToString());
+                try
+                {
+                    File.AppendAllText($"{DateTime.Now.Year.ToString("0000")}-{DateTime.Now.Month.ToString("00")}-{DateTime.Now.Day.ToString("00")}.py", msg.ToString() + "\n");
+                } catch(Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
         }
     }
 

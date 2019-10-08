@@ -77,6 +77,7 @@ namespace ChatProgram.Server
             do
             {
                 TcpClient client = Server.AcceptTcpClient();
+                Logger.LogMsg("New TcpClient connected");
                 var stream = client.GetStream();
                 var bytes = new Byte[client.ReceiveBufferSize];
                 stream.Read(bytes, 0, bytes.Length);
@@ -88,17 +89,26 @@ namespace ChatProgram.Server
                 var nClient = new User();
                 nClient.Id = _id++;
                 nClient.Name = data;
+                Logger.LogMsg($"New User: '{data}' ({nClient.Id})");
                 Common.Users[nClient.Id] = nClient;
                 var conn = new Connection();
                 Connections[nClient.Id] = conn;
                 conn.Client = client;
                 conn.Listen();
+                conn.Receieved += Conn_Receieved;
+                var identity = new Packet(PacketId.GiveIdentity, nClient.ToJson());
+                conn.Send(identity.ToString());
 
                 Form.Invoke(new Action(() =>
                 {
                     NewUser?.Invoke(this, nClient);
                 }));
             } while (_listen);
+        }
+
+        private void Conn_Receieved(object sender, string e)
+        {
+            Logger.LogMsg(e);
         }
     }
 }
