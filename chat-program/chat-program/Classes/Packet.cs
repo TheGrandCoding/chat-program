@@ -40,7 +40,7 @@ namespace ChatProgram.Classes
         NewMessage,
         UserJoined,
         UserLeft,
-        UserList,
+        UserUpdate,
         MessageEdited,
         GiveIdentity,
         // From-Client Packets

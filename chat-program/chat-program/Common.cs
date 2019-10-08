@@ -11,6 +11,9 @@ namespace ChatProgram
     {
         public static Dictionary<uint, User> Users = new Dictionary<uint, User>();
 
+        public static uint USER_ID = 0;
+        public static uint MESSAGE_ID = 0;
+
         static User getUserWhenNotCached(uint id)
         {
             if(!Program.IsServer) // server should populate above list, so should always be able to get it

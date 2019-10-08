@@ -102,6 +102,7 @@ namespace ChatProgram.Server
             if(e.KeyCode == Keys.Enter)
             {
                 var msg = new Classes.Message() { Author = SERVERUSER, Content = txtMessage.Text };
+                msg.Id = Common.MESSAGE_ID++;
                 Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
                 Server._internalServerMessage(msg);
                 txtMessage.Text = "";

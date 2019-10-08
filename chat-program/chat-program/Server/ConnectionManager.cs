@@ -59,7 +59,7 @@ namespace ChatProgram.Server
             }
         }
 
-        bool _listen;
+        bool _listen = true;
         public bool Listening {  get
             {
                 return _listen;
@@ -68,8 +68,6 @@ namespace ChatProgram.Server
                 _listen = value;
             }
         }
-
-        uint _id = 0;
 
         Thread newClientThread;
         void newClientHandle()
@@ -84,20 +82,29 @@ namespace ChatProgram.Server
                 var data = Encoding.UTF8.GetString(bytes);
 
                 data = data.Replace("\0", "").Trim();
-                data = data.Substring(1, data.Length - 1);
+                data = data.Substring(1, data.Length - 2);
 
                 var nClient = new User();
-                nClient.Id = _id++;
+                nClient.Id = Common.USER_ID++;
                 nClient.Name = data;
                 Logger.LogMsg($"New User: '{data}' ({nClient.Id})");
                 Common.Users[nClient.Id] = nClient;
-                var conn = new Connection();
+                var conn = new Connection(nClient.Id.ToString());
                 Connections[nClient.Id] = conn;
                 conn.Client = client;
                 conn.Listen();
                 conn.Receieved += Conn_Receieved;
                 var identity = new Packet(PacketId.GiveIdentity, nClient.ToJson());
                 conn.Send(identity.ToString());
+
+                foreach(var id in Connections.Keys)
+                {
+                    if(Common.Users.TryGetValue(id, out var user))
+                    {
+                        var packet = new Packet(PacketId.UserUpdate, user.ToJson());
+                        conn.Send(packet.ToString());
+                    }
+                }
 
                 Form.Invoke(new Action(() =>
                 {
@@ -108,7 +115,39 @@ namespace ChatProgram.Server
 
         private void Conn_Receieved(object sender, string e)
         {
-            Logger.LogMsg(e);
+            if(sender is Connection connection)
+            {
+                if(uint.TryParse(connection.Reference, out var id))
+                {
+                    if(Common.Users.TryGetValue(id, out var user))
+                    {
+                        Logger.LogMsg($"From {user.Name}({user.Id}): {e}");
+                        Form.Invoke(new Action(() => {
+                            var packet = new Packet(e);
+                            HandleConnMessage(connection, user, packet);
+                        }));
+                    } else
+                    {
+                        Logger.LogMsg($"No User ({id}): {e}", LogSeverity.Warning);
+                    }
+                } else
+                {
+                    Logger.LogMsg($"No Reference ({connection.Reference}): {e}");
+                }
+            }
+        }
+
+        private void HandleConnMessage(Connection connection, User user, Packet packet)
+        {
+            if(packet.Id == PacketId.SendMessage)
+            {
+                var msg = new Message();
+                msg.FromJson(packet.Information);
+                msg.Id = Common.MESSAGE_ID++;
+                NewMessage?.Invoke(this, msg);
+                var pong = new Packet(PacketId.NewMessage, msg.ToJson());
+                Broadcast(pong);
+            }
         }
     }
 }

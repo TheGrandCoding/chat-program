@@ -17,10 +17,11 @@ namespace ChatProgram.Client
         public event EventHandler<User> NewUser;
         public event EventHandler<User> UserDisconnected;
         public event EventHandler<User> IdentityKnown;
+        public event EventHandler<User> UserUpdate;
 
         public User CurrentUser;
 
-        public ClientConnection(ClientForm form)
+        public ClientConnection(ClientForm form) : base ("Server")
         {
             Form = form;
             base.Receieved += parseJson;
@@ -48,6 +49,14 @@ namespace ChatProgram.Client
                 Form.Invoke(new Action(() =>
                 {
                     IdentityKnown?.Invoke(this, usr);
+                }));
+            } else if(packet.Id == PacketId.UserUpdate)
+            {
+                var usr = new User();
+                usr.FromJson(packet.Information);
+                Form.Invoke(new Action(() =>
+                {
+                    UserUpdate?.Invoke(this, usr);
                 }));
             }
         }

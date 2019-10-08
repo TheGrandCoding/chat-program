@@ -10,8 +10,10 @@ namespace ChatProgram.Classes
 {
     public class Connection
     {
-        public Connection()
+        public string Reference;
+        public Connection(string name)
         {
+            Reference = name;
             Client = new TcpClient(AddressFamily.InterNetwork);
         }
         public TcpClient Client { get; set; }
