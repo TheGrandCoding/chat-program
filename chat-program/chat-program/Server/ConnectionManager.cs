@@ -12,6 +12,11 @@ namespace ChatProgram.Server
 {
     public class ConnectionManager
     {
+        public ServerForm Form;
+        public ConnectionManager(ServerForm form)
+        {
+            Form = form;
+        }
         TcpListener Server = new TcpListener(IPAddress.Loopback, Program.Port);
 
         Dictionary<uint, Connection> Connections = new Dictionary<uint, Connection>();
@@ -20,6 +25,19 @@ namespace ChatProgram.Server
         /// Client has sent this <see cref="Message"/> to be broadcasted
         /// </summary>
         public event EventHandler<Message> NewMessage;
+
+        public void _internalServerMessage(Message m)
+        {
+            if(Form.InvokeRequired)
+            {
+                Form.Invoke(new Action(() =>
+                {
+                    _internalServerMessage(m);
+                }));
+                return;
+            }
+            NewMessage?.Invoke(this, m);
+        }
 
         /// <summary>
         /// A new client has connected, this is it.
@@ -64,6 +82,9 @@ namespace ChatProgram.Server
                 stream.Read(bytes, 0, bytes.Length);
                 var data = Encoding.UTF8.GetString(bytes);
 
+                data = data.Replace("\0", "").Trim();
+                data = data.Substring(1, data.Length - 1);
+
                 var nClient = new User();
                 nClient.Id = _id++;
                 nClient.Name = data;
@@ -73,7 +94,10 @@ namespace ChatProgram.Server
                 conn.Client = client;
                 conn.Listen();
 
-                NewUser?.Invoke(this, nClient);
+                Form.Invoke(new Action(() =>
+                {
+                    NewUser?.Invoke(this, nClient);
+                }));
             } while (_listen);
         }
     }

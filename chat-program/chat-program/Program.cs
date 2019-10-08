@@ -21,6 +21,10 @@ namespace ChatProgram
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Menu());
+            while(Menu.Client != null || Menu.Server != null)
+            {
+                System.Threading.Thread.Sleep(1000);
+            }
         }
     }
 }

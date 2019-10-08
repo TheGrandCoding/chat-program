@@ -28,51 +28,63 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.gbMessages = new System.Windows.Forms.GroupBox();
+            this.containerMessages = new System.Windows.Forms.GroupBox();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.gbUsers = new System.Windows.Forms.GroupBox();
+            this.gbMessages = new System.Windows.Forms.Panel();
+            this.containerMessages.SuspendLayout();
             this.SuspendLayout();
             // 
-            // gbMessages
+            // containerMessages
             // 
-            this.gbMessages.Location = new System.Drawing.Point(16, 15);
-            this.gbMessages.Margin = new System.Windows.Forms.Padding(4);
-            this.gbMessages.Name = "gbMessages";
-            this.gbMessages.Padding = new System.Windows.Forms.Padding(4);
-            this.gbMessages.Size = new System.Drawing.Size(755, 496);
-            this.gbMessages.TabIndex = 0;
-            this.gbMessages.TabStop = false;
-            this.gbMessages.Text = "Messages";
+            this.containerMessages.Controls.Add(this.gbMessages);
+            this.containerMessages.Location = new System.Drawing.Point(12, 12);
+            this.containerMessages.Name = "containerMessages";
+            this.containerMessages.Size = new System.Drawing.Size(566, 403);
+            this.containerMessages.TabIndex = 0;
+            this.containerMessages.TabStop = false;
+            this.containerMessages.Text = "Messages";
             // 
             // txtMessage
             // 
-            this.txtMessage.Location = new System.Drawing.Point(16, 518);
-            this.txtMessage.Margin = new System.Windows.Forms.Padding(4);
+            this.txtMessage.Location = new System.Drawing.Point(12, 421);
             this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(753, 22);
+            this.txtMessage.Size = new System.Drawing.Size(566, 20);
             this.txtMessage.TabIndex = 1;
             this.txtMessage.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyUp);
             // 
             // gbUsers
             // 
-            this.gbUsers.Location = new System.Drawing.Point(778, 15);
+            this.gbUsers.Location = new System.Drawing.Point(584, 12);
+            this.gbUsers.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.gbUsers.Name = "gbUsers";
-            this.gbUsers.Size = new System.Drawing.Size(277, 525);
+            this.gbUsers.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gbUsers.Size = new System.Drawing.Size(208, 427);
             this.gbUsers.TabIndex = 2;
             this.gbUsers.TabStop = false;
             this.gbUsers.Text = "Users";
             // 
+            // gbMessages
+            // 
+            this.gbMessages.AutoScroll = true;
+            this.gbMessages.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gbMessages.Location = new System.Drawing.Point(3, 16);
+            this.gbMessages.Name = "gbMessages";
+            this.gbMessages.Size = new System.Drawing.Size(560, 384);
+            this.gbMessages.TabIndex = 0;
+            // 
             // ServerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1067, 554);
+            this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.gbUsers);
             this.Controls.Add(this.txtMessage);
-            this.Controls.Add(this.gbMessages);
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Controls.Add(this.containerMessages);
             this.Name = "ServerForm";
             this.Text = "ServerForm";
+            this.Load += new System.EventHandler(this.ServerForm_Load);
+            this.containerMessages.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -80,8 +92,9 @@
 
         #endregion
 
-        private System.Windows.Forms.GroupBox gbMessages;
+        private System.Windows.Forms.GroupBox containerMessages;
         private System.Windows.Forms.TextBox txtMessage;
         private System.Windows.Forms.GroupBox gbUsers;
+        private System.Windows.Forms.Panel gbMessages;
     }
 }

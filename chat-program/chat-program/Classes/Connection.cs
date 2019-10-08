@@ -24,6 +24,7 @@ namespace ChatProgram.Classes
             var stream = Client.GetStream();
             var bytes = Encoding.UTF8.GetBytes(message);
             stream.Write(bytes, 0, bytes.Length);
+            stream.Flush();
         }
 
         public void Listen()

@@ -17,6 +17,7 @@ namespace ChatProgram.Client
         {
             InitializeComponent();
             Client = new ClientConnection();
+            Logger.LogMsg("Client started");
         }
 
         public ClientConnection Client;
@@ -26,14 +27,15 @@ namespace ChatProgram.Client
             Client.Client.Connect(ip, Program.Port);
             if(Client.Client.Connected)
             {
-                Client.Listen();
                 Client.NewMessage += Client_NewMessage;
+                Client.Send(Environment.UserName);
+                Client.Listen();
             }
         }
 
         private void Client_NewMessage(object sender, Classes.Message e)
         {
-            MessageBox.Show(e.Content);
+            MessageBox.Show(e.Content, e.Author.Name);
         }
     }
 }

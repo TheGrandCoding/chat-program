@@ -24,7 +24,7 @@ namespace ChatProgram.Classes
         public override JObject ToJson()
         {
             var jobj = new JObject();
-            jobj["author"] = Author.Name;
+            jobj["author"] = Author.Id;
             jobj["content"] = Content;
             jobj["id"] = Id.ToString();
             return jobj;

@@ -18,8 +18,8 @@ namespace ChatProgram
             InitializeComponent();
         }
 
-        public Client.ClientForm Client;
-        public Server.ServerForm Server;
+        public static Client.ClientForm Client;
+        public static Server.ServerForm Server;
 
         private void btnHost_Click(object sender, EventArgs e)
         {
@@ -29,7 +29,7 @@ namespace ChatProgram
             Client = new Client.ClientForm();
             Client.Connect(IPAddress.Parse("127.0.0.1"));
             Client.Show();
-            this.Close();
+            this.Hide();
         }
     }
 }
