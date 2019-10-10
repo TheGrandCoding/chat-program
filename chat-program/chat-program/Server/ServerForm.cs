@@ -54,6 +54,14 @@ namespace ChatProgram.Server
                 gbUsers.Controls.Add(lbl);
                 lbl.Click += user_click;
             }
+
+            var msg = new Classes.Message();
+            msg.Author = SERVERUSER;
+            msg.Id = Common.IterateMessageId();
+            msg.Content = $"{e.Name} has connected";
+            msg.Colour = Color.Red;
+            Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
+            Server_NewMessage(this, msg);
         }
 
         private void user_click(object sender, EventArgs e)
@@ -69,12 +77,13 @@ namespace ChatProgram.Server
 
         Label getLabelFor(Classes.Message message, ref int y)
         {
+            int y_offset = y - gbMessages.VerticalScroll.Value; ;
             var lbl = new Label();
             lbl.Text = $"{message.Author.Name}: {message.Content}";
             lbl.Tag = message;
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
-            lbl.Location = new Point(5, y);
+            lbl.Location = new Point(5, y_offset);
             y += 20;
             return lbl;
         }
@@ -102,7 +111,7 @@ namespace ChatProgram.Server
             if(e.KeyCode == Keys.Enter)
             {
                 var msg = new Classes.Message() { Author = SERVERUSER, Content = txtMessage.Text };
-                msg.Id = Common.MESSAGE_ID++;
+                msg.Id = Common.IterateMessageId();
                 Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
                 Server._internalServerMessage(msg);
                 txtMessage.Text = "";
@@ -112,6 +121,12 @@ namespace ChatProgram.Server
         private void ServerForm_Load(object sender, EventArgs e)
         {
             gbMessages.BringToFront();
+        }
+
+        private void heartBeatTimer_Tick(object sender, EventArgs e)
+        {
+            var packet = new Packet(PacketId.HEARTBEAT, new Newtonsoft.Json.Linq.JObject());
+            Server.Broadcast(packet);
         }
     }
 }

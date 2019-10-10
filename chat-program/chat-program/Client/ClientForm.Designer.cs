@@ -49,7 +49,7 @@
             // txtMessage
             // 
             this.txtMessage.Location = new System.Drawing.Point(13, 517);
-            this.txtMessage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMessage.Margin = new System.Windows.Forms.Padding(4);
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.Size = new System.Drawing.Size(753, 22);
             this.txtMessage.TabIndex = 4;
@@ -59,9 +59,9 @@
             // 
             this.containerMessages.Controls.Add(this.gbMessages);
             this.containerMessages.Location = new System.Drawing.Point(13, 14);
-            this.containerMessages.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.containerMessages.Margin = new System.Windows.Forms.Padding(4);
             this.containerMessages.Name = "containerMessages";
-            this.containerMessages.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.containerMessages.Padding = new System.Windows.Forms.Padding(4);
             this.containerMessages.Size = new System.Drawing.Size(755, 496);
             this.containerMessages.TabIndex = 3;
             this.containerMessages.TabStop = false;
@@ -72,7 +72,7 @@
             this.gbMessages.AutoScroll = true;
             this.gbMessages.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbMessages.Location = new System.Drawing.Point(4, 19);
-            this.gbMessages.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gbMessages.Margin = new System.Windows.Forms.Padding(4);
             this.gbMessages.Name = "gbMessages";
             this.gbMessages.Size = new System.Drawing.Size(747, 473);
             this.gbMessages.TabIndex = 0;
@@ -85,9 +85,11 @@
             this.Controls.Add(this.gbUsers);
             this.Controls.Add(this.txtMessage);
             this.Controls.Add(this.containerMessages);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ClientForm";
             this.Text = "ClientForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ClientForm_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ClientForm_FormClosed);
             this.Load += new System.EventHandler(this.ClientForm_Load);
             this.containerMessages.ResumeLayout(false);
             this.ResumeLayout(false);

@@ -11,8 +11,50 @@ namespace ChatProgram
     {
         public static Dictionary<uint, User> Users = new Dictionary<uint, User>();
 
-        public static uint USER_ID = 0;
-        public static uint MESSAGE_ID = 0;
+
+        static uint _userIdNoTouchy = 0;
+        public static uint USER_ID 
+        {  
+            get
+            {
+                lock(IDLOCK)
+                {
+                    return _userIdNoTouchy;
+                }
+            } set
+            {
+                lock(IDLOCK)
+                {
+                    _userIdNoTouchy = value;
+                }
+            }
+        }
+
+        static object IDLOCK = new object();
+        static uint _messageIdNoTouchy = 0;
+        public static uint MESSAGE_ID {  get
+            {
+                lock(IDLOCK)
+                {
+                    return _messageIdNoTouchy;
+                }
+            } set
+            {
+                lock(IDLOCK)
+                {
+                    _messageIdNoTouchy = value;
+                }
+            }
+        }
+
+        public static uint IterateMessageId()
+        {
+            lock(IDLOCK)
+            {
+                _messageIdNoTouchy += 1;
+                return _messageIdNoTouchy - 1;
+            }
+        }
 
         static User getUserWhenNotCached(uint id)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,11 +15,15 @@ namespace ChatProgram.Classes
         public User Author { get; set; }
         public string Content { get; set; }
 
+        public Color Colour { get; set; } = Color.Black;
+
         public override void FromJson(JObject json)
         {
             Content = json["content"].ToObject<string>();
             Id = json["id"].ToObject<uint>();
             Author = Common.GetUser(json["author"].ToObject<uint>());
+            if(json.ContainsKey("color"))
+                Colour = Color.FromName(json["color"].ToObject<string>());
         }
 
         public override JObject ToJson()
@@ -27,6 +32,8 @@ namespace ChatProgram.Classes
             jobj["author"] = Author.Id;
             jobj["content"] = Content;
             jobj["id"] = Id.ToString();
+            if(Colour != Color.Black)
+                jobj["color"] = Colour.Name;
             return jobj;
         }
     }

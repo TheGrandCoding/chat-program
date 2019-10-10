@@ -21,7 +21,7 @@ namespace ChatProgram.Client
 
         public User CurrentUser;
 
-        public ClientConnection(ClientForm form) : base ("Server")
+        public ClientConnection(ClientForm form, Func<Connection, Exception, Task> callback) : base ("Server", callback)
         {
             Form = form;
             base.Receieved += parseJson;
@@ -29,7 +29,7 @@ namespace ChatProgram.Client
 
         void parseJson(object sender, string json)
         {
-            Logger.LogMsg("Recievd: " + json);
+            Logger.LogMsg("Recieved: " + json);
             var packet = new Packet(json);
             if (packet.Id == PacketId.NewMessage)
             {
@@ -57,6 +57,14 @@ namespace ChatProgram.Client
                 Form.Invoke(new Action(() =>
                 {
                     UserUpdate?.Invoke(this, usr);
+                }));
+            } else if(packet.Id == PacketId.UserLeft)
+            {
+                var usr = new User();
+                usr.FromJson(packet.Information);
+                Form.Invoke(new Action(() =>
+                {
+                    UserDisconnected?.Invoke(this, usr);
                 }));
             }
         }

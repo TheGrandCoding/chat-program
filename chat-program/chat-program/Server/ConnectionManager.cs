@@ -44,11 +44,14 @@ namespace ChatProgram.Server
         /// </summary>
         public event EventHandler<User> NewUser;
 
+        public event EventHandler<User> DisconnectUser;
+
         public void Start()
         {
             Server.Start();
             newClientThread = new Thread(newClientHandle);
             newClientThread.Start();
+            Form.heartBeatTimer.Start();
         }
 
         public void Broadcast(Packet packet)
@@ -89,7 +92,7 @@ namespace ChatProgram.Server
                 nClient.Name = data;
                 Logger.LogMsg($"New User: '{data}' ({nClient.Id})");
                 Common.Users[nClient.Id] = nClient;
-                var conn = new Connection(nClient.Id.ToString());
+                var conn = new Connection(nClient.Id.ToString(), HandleConnDisconnect);
                 Connections[nClient.Id] = conn;
                 conn.Client = client;
                 conn.Listen();
@@ -143,11 +146,43 @@ namespace ChatProgram.Server
             {
                 var msg = new Message();
                 msg.FromJson(packet.Information);
-                msg.Id = Common.MESSAGE_ID++;
+                msg.Id = Common.IterateMessageId();
                 NewMessage?.Invoke(this, msg);
                 var pong = new Packet(PacketId.NewMessage, msg.ToJson());
                 Broadcast(pong);
+            } else if (packet.Id == PacketId.Disconnect)
+            {
+                HandleConnDisconnect(connection, new Exception("User self-disconnected"));
             }
+        }
+
+        private Task HandleConnDisconnect(Connection connection, Exception error)
+        {
+            if(uint.TryParse(connection.Reference, out var id))
+            {
+                if(Common.Users.TryGetValue(id, out var user))
+                {
+                    Connections.Remove(id);
+                    // Dont remove from users, since that might be helpful to keep
+                    Logger.LogMsg($"Disconnect on {id} {user.Name}");
+                    Form.Invoke(new Action(() => {
+                        var msg = new Classes.Message();
+                        msg.Content = $"{user.Name} has disconnected";
+                        msg.Colour = System.Drawing.Color.Red;
+                        msg.Author = Form.SERVERUSER;
+                        msg.Id = Common.IterateMessageId();
+                        NewMessage?.Invoke(this, msg);
+                        var packet = new Packet(PacketId.NewMessage, msg.ToJson());
+                        Broadcast(packet);
+
+                        var leftPacket = new Packet(PacketId.UserLeft, user.ToJson());
+                        Broadcast(leftPacket);
+                    }));
+                    return Task.CompletedTask;
+                }
+            }
+            Logger.LogMsg($"Disconnect on {id}, no user available.");
+            return Task.CompletedTask;
         }
     }
 }

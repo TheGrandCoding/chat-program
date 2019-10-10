@@ -17,7 +17,10 @@ namespace ChatProgram
         public Menu()
         {
             InitializeComponent();
+            INSTANCE = this;
         }
+
+        public static Menu INSTANCE;
 
         public static Client.ClientForm Client;
         public static Server.ServerForm Server;
@@ -46,6 +49,12 @@ namespace ChatProgram
             {
                 MessageBox.Show("IPAddress could not be parsed from your input.\nPerhaps try to read the prompt next time, eh?");
             }
+        }
+
+        private void Menu_Activated(object sender, EventArgs e)
+        {
+            btnHost.Enabled = Server == null;
+            btnJoin.Enabled = Client == null;
         }
     }
 }

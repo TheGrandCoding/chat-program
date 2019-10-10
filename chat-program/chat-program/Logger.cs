@@ -64,7 +64,7 @@ namespace ChatProgram
                 content = Content;
             else
                 content = Error.ToString();
-            return $"{DateTime.Now.ToShortTimeString()}: {Severity} {Location} {content}";
+            return $"{DateTime.Now.ToLongTimeString()}: {Severity} {Location} {content}";
 
             //    var guild = Program.TheGrandCodingGuild.GetTextChannel(id)
         }

@@ -9,8 +9,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
 
 namespace ChatProgram.Client
 {
@@ -19,11 +17,32 @@ namespace ChatProgram.Client
         public ClientForm()
         {
             InitializeComponent();
-            Client = new ClientConnection(this);
+            Client = new ClientConnection(this, Disconnected);
             Logger.LogMsg("Client started");
         }
 
         public ClientConnection Client;
+
+        Task Disconnected(Connection conn, Exception ex)
+        {
+            if (this.InvokeRequired)
+            {
+                try
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        Disconnected(conn, ex);
+                    }));
+                } catch { }
+                return Task.CompletedTask;
+            }
+
+            ChatProgram.Menu.Client = null;
+            ChatProgram.Menu.INSTANCE.Show();
+            this.Close();
+            MessageBox.Show((ex?.Message ?? "Client disconnected from server connection for an unknown reason"), "Disconnected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return Task.CompletedTask;
+        }
 
         public void Connect(IPAddress ip)
         {
@@ -36,6 +55,7 @@ namespace ChatProgram.Client
                 Client.NewUser += Client_UserListChange;
                 Client.IdentityKnown += Client_UserListChange;
                 Client.UserUpdate += Client_UserListChange;
+                Client.UserDisconnected += Client_UserDisconnected;
                 Client.Send(Environment.UserName);
                 Logger.LogMsg("Sent username, opened listener");
                 Client.Listen();
@@ -47,6 +67,7 @@ namespace ChatProgram.Client
             }
         }
 
+
         Label createLabelFor(User u, ref int y)
         {
             int x = 5;
@@ -57,10 +78,16 @@ namespace ChatProgram.Client
             y += 30;
             return label;
         }
+        private void Client_UserDisconnected(object sender, User e)
+        {
+            Common.Users.Remove(e.Id);
+            Client_UserListChange(this, null);
+        }
 
         private void Client_UserListChange(object sender, Classes.User e)
         {
-            Common.Users[e.Id] = e;
+            if(e != null)
+                Common.Users[e.Id] = e;
             gbUsers.Controls.Clear();
             var users = Common.Users.OrderBy(x => x.Key);
             int y = 15;
@@ -84,19 +111,17 @@ namespace ChatProgram.Client
 
         Label getLabelFor(Classes.Message message, ref int y)
         {
-            int y_offset = y;
-            if (this.AutoScrollOffset.Y != 0)
-                y_offset -= this.AutoScrollOffset.Y;
+            int y_offset = y - gbMessages.VerticalScroll.Value;
             var lbl = new Label();
             lbl.Text = $"{message.Author.Name}: {message.Content}";
             lbl.Tag = message;
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
-            lbl.Location = new Point(5, y);
+            lbl.Location = new Point(5, y_offset);
             y += 20;
             return lbl;
         }
-        private void ClientForm_Activated(object sender, EventArgs e)
+        public void ClientForm_Activated(object sender, EventArgs e)
         {
             uint latestMax = LAST_SEEN_MESSAGE;
             foreach(var control in gbMessages.Controls)
@@ -115,10 +140,11 @@ namespace ChatProgram.Client
                 LAST_SEEN_MESSAGE = latestMax;
         }
         int MESSAGE_Y = 5;
-        uint LAST_SEEN_MESSAGE = 0;
+        public uint LAST_SEEN_MESSAGE = 0;
         private void Client_NewMessage(object sender, Classes.Message e)
         {
             var lbl = getLabelFor(e, ref MESSAGE_Y);
+            lbl.ForeColor = e.Colour;
             lbl.Click += Lbl_Click;
             if(Form.ActiveForm == this)
             {
@@ -140,7 +166,6 @@ namespace ChatProgram.Client
                 MESSAGE_Y += 5;
                 rows--;
             }
-            this.Text = MESSAGE_Y.ToString();
         }
 
         private void Lbl_Click(object sender, EventArgs e)
@@ -165,6 +190,27 @@ namespace ChatProgram.Client
         private void ClientForm_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void ClientForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                var packet = new Packet(PacketId.Disconnect, new Newtonsoft.Json.Linq.JObject());
+                Client.Send(packet.ToString());
+            } catch { }
+        }
+
+        private void ClientForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            try
+            {
+                Client.Client.Close();
+            }
+            catch { }
+            ChatProgram.Menu.Client = null;
+            ChatProgram.Menu.INSTANCE.Show();
+            Client = null;
         }
     }
 }

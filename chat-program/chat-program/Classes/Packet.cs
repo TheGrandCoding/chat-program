@@ -37,6 +37,7 @@ namespace ChatProgram.Classes
     public enum PacketId
     {
         // From-Server Packets
+        HEARTBEAT,
         NewMessage,
         UserJoined,
         UserLeft,
@@ -47,6 +48,5 @@ namespace ChatProgram.Classes
         Connect,
         Disconnect,
         SendMessage
-
     }
 }
