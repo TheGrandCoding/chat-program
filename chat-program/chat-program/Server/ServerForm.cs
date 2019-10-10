@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -91,6 +92,11 @@ namespace ChatProgram.Server
         int MESSAGE_Y = 5;
         private void Server_NewMessage(object sender, Classes.Message e)
         {
+            if(this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => { Server_NewMessage(sender, e); }));
+                return;
+            }
             var lbl = getLabelFor(e, ref MESSAGE_Y);
             lbl.Click += msg_click;
             gbMessages.Controls.Add(lbl);
@@ -110,6 +116,17 @@ namespace ChatProgram.Server
         {
             if(e.KeyCode == Keys.Enter)
             {
+                if(txtMessage.Text.StartsWith("/token "))
+                {
+                    string key = txtMessage.Text.Replace("/token ", "");
+                    Program.SetRegistry("apiKey", key);
+                    var reply = new Classes.Message();
+                    reply.Author = SERVERUSER;
+                    reply.Colour = Color.Blue;
+                    reply.Content = $"API token was set to {key}, reopen server to take effect";
+                    Server_NewMessage(this, reply);
+                    return;
+                }
                 var msg = new Classes.Message() { Author = SERVERUSER, Content = txtMessage.Text };
                 msg.Id = Common.IterateMessageId();
                 Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
@@ -121,6 +138,46 @@ namespace ChatProgram.Server
         private void ServerForm_Load(object sender, EventArgs e)
         {
             gbMessages.BringToFront();
+            var token = Program.GetRegistry("apiKey", "");
+            if(string.IsNullOrWhiteSpace(token))
+            {
+                var msg = new Classes.Message();
+                msg.Author = SERVERUSER;
+                msg.Colour = Color.Blue;
+                msg.Content = $"You need to enter the server's API token. Use /token [value]";
+                Server_NewMessage(this, msg);
+            } else
+            {
+                var th = new System.Threading.Thread(() => doSetIPOnBot(token));
+                th.Start();
+                var msg = new Classes.Message();
+                msg.Author = SERVERUSER;
+                msg.Colour = Color.Blue;
+                msg.Content = $"Attempting to set IP as {Program.GetIPAddress()} with '{token}'";
+                Server_NewMessage(this, msg);
+            }
+        }
+
+        void doSetIPOnBot(string token)
+        {
+            var ip = Program.GetIPAddress();
+            using(HttpClient client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, $"{Program.APIBASE}/chat/ip?value={ip}&token={token}");
+                var response = client.SendAsync(request).Result;
+                var msg = new Classes.Message();
+                msg.Author = SERVERUSER;
+                msg.Colour = Color.Blue;
+                if(response.IsSuccessStatusCode)
+                {
+                    msg.Content = $"API reports IP was correctly set.";
+                } else
+                {
+                    msg.Colour = Color.DarkCyan;
+                    msg.Content = $"API reports error: {response.StatusCode} :: {response.Content.ReadAsStringAsync().Result}";
+                }
+                Server_NewMessage(this, msg);
+            }
         }
 
         private void heartBeatTimer_Tick(object sender, EventArgs e)

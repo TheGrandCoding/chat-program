@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -26,6 +29,21 @@ namespace ChatProgram
 
         public static bool IsServer { get; set; } = false;
 
+        public static string GetIPAddress()
+        {
+            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
+        }
+
+        public static string DefaultIP = "";
+
         public const int Port = 6098;
 
         /// <summary>
@@ -37,11 +55,35 @@ namespace ChatProgram
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            var th = new Thread(getServerDefaltIp);
+            th.Start();
             Application.Run(new Menu());
             while(Menu.Client != null || Menu.Server != null)
             {
                 System.Threading.Thread.Sleep(1000);
             }
+        }
+
+        public const string APIBASE = "http://localhost:8887";
+
+        static void getServerDefaltIp()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{APIBASE}/chat/ip");
+                var response = client.SendAsync(request).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string text = response.Content.ReadAsStringAsync().Result;
+                    if(IPAddress.TryParse(text, out var addr))
+                    {
+                        DefaultIP = addr.ToString();
+                    }
+                }
+            }
+            if (string.IsNullOrWhiteSpace(DefaultIP))
+                DefaultIP = "127.0.0.1";
+            Menu.INSTANCE.Invoke(new Action(() => { Menu.INSTANCE.ButtonRefresh(); }));
         }
 
         private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)

@@ -39,13 +39,17 @@ namespace ChatProgram
         private void btnJoin_Click(object sender, EventArgs e)
         {
             Client = new Client.ClientForm();
-            string input = Interaction.InputBox("Enter ze IP", "Schnell", "127.0.0.1");
+            string input = Interaction.InputBox("Enter ze IP", "Schnell", Program.DefaultIP);
             if(IPAddress.TryParse(input, out var address))
             {
                 if(Client.Connect(address))
                 {
                     Client.Show();
                     this.Hide();
+                } else
+                {
+                    Client.Close();
+                    Client = null;
                 }
             }
             else
@@ -54,10 +58,15 @@ namespace ChatProgram
             }
         }
 
-        private void Menu_Activated(object sender, EventArgs e)
+        public void ButtonRefresh()
         {
             btnHost.Enabled = Server == null;
-            btnJoin.Enabled = Client == null;
+            btnJoin.Enabled = Client == null && !string.IsNullOrWhiteSpace(Program.DefaultIP);
+        }
+
+        private void Menu_Activated(object sender, EventArgs e)
+        {
+            ButtonRefresh();
         }
 
         private void Menu_FormClosing(object sender, FormClosingEventArgs e)
