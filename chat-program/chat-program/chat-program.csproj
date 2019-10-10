@@ -90,8 +90,12 @@
     <Compile Include="Client\ClientForm.Designer.cs">
       <DependentUpon>ClientForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Client\DesktopNotificationManagerCompat.cs" />
-    <Compile Include="Client\ClientActivator.cs" />
+    <Compile Include="Client\NotificationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Client\NotificationForm.Designer.cs">
+      <DependentUpon>NotificationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Menu.cs">
@@ -111,6 +115,9 @@
     </Compile>
     <EmbeddedResource Include="Client\ClientForm.resx">
       <DependentUpon>ClientForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Client\NotificationForm.resx">
+      <DependentUpon>NotificationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Menu.resx">
       <DependentUpon>Menu.cs</DependentUpon>

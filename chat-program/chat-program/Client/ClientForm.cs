@@ -1,6 +1,4 @@
 ﻿using ChatProgram.Classes;
-using NotificationsExtensions;
-using NotificationsExtensions.Toasts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -128,6 +126,11 @@ namespace ChatProgram.Client
             } else
             {
                 lbl.BackColor = Color.LightCoral;
+                if(e.Author.Id != Client.CurrentUser.Id)
+                {
+                    var notForm = new NotificationForm(this);
+                    notForm.Show(e);
+                }
             }
             this.gbMessages.Controls.Add(lbl);
             int charactors = lbl.Text.Length;
@@ -138,63 +141,6 @@ namespace ChatProgram.Client
                 rows--;
             }
             this.Text = MESSAGE_Y.ToString();
-
-            ToastContent content = new ToastContent()
-            {
-                Launch = $"{e.Id}",
-                Visual = new ToastVisual
-                {
-                    BindingGeneric = new ToastBindingGeneric()
-                    {
-                        AppLogoOverride = new ToastGenericAppLogo
-                        {
-                            HintCrop = ToastGenericAppLogoCrop.Circle,
-                            Source = "http://messageme.com/lei/profile.jpg"
-                        },
-                        Children =
-                        {
-                            new AdaptiveText {Text = $"New message from {e.Author.Name}" },
-                            new AdaptiveText {Text = e.Content }
-                        },
-                        Attribution = new ToastGenericAttributionText
-                        {
-                            Text = "Alert"
-                        },
-                    }
-                },
-                Actions = new ToastActionsCustom()
-                {
-                    Inputs =
-                    {
-                        new ToastTextBox("tbReply")
-                        {
-                            PlaceholderContent = "Type a response"
-                        }
-                    },
-                    Buttons =
-                    {   
-                        new ToastButton("reply", "reply")
-                        {
-                            ActivationType = ToastActivationType.Background,
-                            ImageUri = "Assets/QuickReply.png",
-                            TextBoxId = "tbReply"
-                        }
-                    }
-                },
-                Audio = new ToastAudio()
-                {
-                    Src = new Uri("ms-winsoundevent:Notification.IM")
-                }
-            };
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(content.GetContent());
-
-
-            // Generate WinRT notification
-            var toast = new ToastNotification(doc);
-            
-            // Display toast
-            ToastNotificationManager.CreateToastNotifier("CheAle14.ChatProgram.Client").Show(toast);
         }
 
         private void Lbl_Click(object sender, EventArgs e)
