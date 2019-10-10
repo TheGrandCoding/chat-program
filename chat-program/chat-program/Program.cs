@@ -34,6 +34,7 @@ namespace ChatProgram
         [STAThread]
         static void Main()
         {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Menu());
@@ -42,5 +43,29 @@ namespace ChatProgram
                 System.Threading.Thread.Sleep(1000);
             }
         }
+
+        private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if(args.Name.StartsWith("Newtonsoft.Json"))
+            {
+                Byte[] rawAssembly;
+                try
+                {
+                    rawAssembly = System.IO.File.ReadAllBytes("Newtonsoft.Json.dll");
+
+                } catch (Exception ex)
+                {
+                    try
+                    {
+                        Logger.LogMsg($"Failed to get NewtonsoftDLL, defaulting to stored: {ex}", LogSeverity.Error);
+                    }
+                    catch { }
+                    rawAssembly = Properties.Resources.Newtonsoft_Json;
+                }
+                return System.Reflection.Assembly.Load(rawAssembly);
+            }
+            return null;
+        }
+
     }
 }

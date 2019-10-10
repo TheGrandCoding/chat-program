@@ -44,10 +44,17 @@ namespace ChatProgram.Client
             return Task.CompletedTask;
         }
 
-        public void Connect(IPAddress ip)
+        public bool Connect(IPAddress ip)
         {
             Logger.LogMsg($"Connecting {ip}");
-            Client.Client.Connect(ip, Program.Port);
+            try
+            {
+                Client.Client.Connect(ip, Program.Port);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogMsg(ex.ToString(), LogSeverity.Warning);
+            }
             if(Client.Client.Connected)
             {
                 Logger.LogMsg("Connected");
@@ -61,9 +68,12 @@ namespace ChatProgram.Client
                 Client.Listen();
                 Common.Users[999] = new User() { Id = 999, Name = "Server" };
                 this.Activated += ClientForm_Activated;
+                return true;
             } else
             {
-                Logger.LogMsg("Failed connect");
+                MessageBox.Show($"Failed to connect to IP");
+                this.Close();
+                return false;
             }
         }
 

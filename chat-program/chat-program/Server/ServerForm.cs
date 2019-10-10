@@ -128,5 +128,30 @@ namespace ChatProgram.Server
             var packet = new Packet(PacketId.HEARTBEAT, new Newtonsoft.Json.Linq.JObject());
             Server.Broadcast(packet);
         }
+
+        private void ServerForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                var packet = new Packet(PacketId.Disconnect, new Newtonsoft.Json.Linq.JObject());
+                Server.Broadcast(packet);
+            } catch { }
+            try
+            {
+                Server.Listening = false;
+            }
+            catch { }
+        }
+
+        private void ServerForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            try
+            {
+                Server.Server.Stop();
+            } catch { }
+            ChatProgram.Menu.Server = null;
+            Server = null;
+            ChatProgram.Menu.INSTANCE.Show();
+        }
     }
 }

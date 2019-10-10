@@ -65,6 +65,7 @@
             this.Name = "Menu";
             this.Text = "Chat Program";
             this.Activated += new System.EventHandler(this.Menu_Activated);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Menu_FormClosing);
             this.ResumeLayout(false);
 
         }

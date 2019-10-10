@@ -17,7 +17,7 @@ namespace ChatProgram.Server
         {
             Form = form;
         }
-        TcpListener Server = new TcpListener(IPAddress.Loopback, Program.Port);
+        public TcpListener Server = new TcpListener(IPAddress.Loopback, Program.Port);
 
         Dictionary<uint, Connection> Connections = new Dictionary<uint, Connection>();
 

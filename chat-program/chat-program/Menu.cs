@@ -42,10 +42,13 @@ namespace ChatProgram
             string input = Interaction.InputBox("Enter ze IP", "Schnell", "127.0.0.1");
             if(IPAddress.TryParse(input, out var address))
             {
-                Client.Connect(address);
-                Client.Show();
-                this.Hide();
-            } else
+                if(Client.Connect(address))
+                {
+                    Client.Show();
+                    this.Hide();
+                }
+            }
+            else
             {
                 MessageBox.Show("IPAddress could not be parsed from your input.\nPerhaps try to read the prompt next time, eh?");
             }
@@ -55,6 +58,15 @@ namespace ChatProgram
         {
             btnHost.Enabled = Server == null;
             btnJoin.Enabled = Client == null;
+        }
+
+        private void Menu_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(Server != null || Client != null)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
         }
     }
 }
