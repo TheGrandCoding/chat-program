@@ -186,10 +186,12 @@ namespace ChatProgram.Client
             }
         }
 
-        private void txtMessage_KeyUp(object sender, KeyEventArgs e)
+        private void txtMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
+                e.SuppressKeyPress = true;
+                e.Handled = true;
                 var msg = new Classes.Message() { Author = Client.CurrentUser, Content = txtMessage.Text };
                 txtMessage.Text = "";
                 var pcket = new Packet(PacketId.SendMessage, msg.ToJson());

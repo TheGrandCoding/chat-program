@@ -17,7 +17,7 @@ namespace ChatProgram.Server
         {
             Form = form;
         }
-        public TcpListener Server = new TcpListener(IPAddress.Loopback, Program.Port);
+        public TcpListener Server = new TcpListener(IPAddress.Any, Program.Port);
 
         Dictionary<uint, Connection> Connections = new Dictionary<uint, Connection>();
 
@@ -48,7 +48,7 @@ namespace ChatProgram.Server
 
         public void Start()
         {
-            Server.Start();
+            Server.Start(3);
             newClientThread = new Thread(newClientHandle);
             newClientThread.Start();
             Form.heartBeatTimer.Start();

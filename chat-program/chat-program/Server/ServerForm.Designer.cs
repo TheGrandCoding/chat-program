@@ -40,11 +40,9 @@
             // containerMessages
             // 
             this.containerMessages.Controls.Add(this.gbMessages);
-            this.containerMessages.Location = new System.Drawing.Point(16, 15);
-            this.containerMessages.Margin = new System.Windows.Forms.Padding(4);
+            this.containerMessages.Location = new System.Drawing.Point(12, 12);
             this.containerMessages.Name = "containerMessages";
-            this.containerMessages.Padding = new System.Windows.Forms.Padding(4);
-            this.containerMessages.Size = new System.Drawing.Size(755, 496);
+            this.containerMessages.Size = new System.Drawing.Size(566, 403);
             this.containerMessages.TabIndex = 0;
             this.containerMessages.TabStop = false;
             this.containerMessages.Text = "Messages";
@@ -53,28 +51,27 @@
             // 
             this.gbMessages.AutoScroll = true;
             this.gbMessages.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbMessages.Location = new System.Drawing.Point(4, 19);
-            this.gbMessages.Margin = new System.Windows.Forms.Padding(4);
+            this.gbMessages.Location = new System.Drawing.Point(3, 16);
             this.gbMessages.Name = "gbMessages";
-            this.gbMessages.Size = new System.Drawing.Size(747, 473);
+            this.gbMessages.Size = new System.Drawing.Size(560, 384);
             this.gbMessages.TabIndex = 0;
             // 
             // txtMessage
             // 
-            this.txtMessage.Location = new System.Drawing.Point(16, 518);
-            this.txtMessage.Margin = new System.Windows.Forms.Padding(4);
+            this.txtMessage.AcceptsReturn = true;
+            this.txtMessage.Location = new System.Drawing.Point(12, 421);
             this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(753, 22);
+            this.txtMessage.Size = new System.Drawing.Size(566, 20);
             this.txtMessage.TabIndex = 1;
-            this.txtMessage.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyUp);
+            this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
             // 
             // gbUsers
             // 
-            this.gbUsers.Location = new System.Drawing.Point(779, 15);
-            this.gbUsers.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gbUsers.Location = new System.Drawing.Point(584, 12);
+            this.gbUsers.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.gbUsers.Name = "gbUsers";
-            this.gbUsers.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.gbUsers.Size = new System.Drawing.Size(277, 526);
+            this.gbUsers.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gbUsers.Size = new System.Drawing.Size(208, 427);
             this.gbUsers.TabIndex = 2;
             this.gbUsers.TabStop = false;
             this.gbUsers.Text = "Users";
@@ -86,13 +83,12 @@
             // 
             // ServerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1067, 554);
+            this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.gbUsers);
             this.Controls.Add(this.txtMessage);
             this.Controls.Add(this.containerMessages);
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ServerForm";
             this.Text = "ServerForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServerForm_FormClosing);

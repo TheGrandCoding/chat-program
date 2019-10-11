@@ -52,7 +52,7 @@ namespace ChatProgram.Client
             this.Show();
         }
 
-        private void txtReply_KeyUp(object sender, KeyEventArgs e)
+        private void txtReply_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(txtReply.Text))
             {
@@ -111,7 +111,7 @@ namespace ChatProgram.Client
             this.SetDesktopLocation(loc.X, loc.Y);
         }
 
-        private void NotificationForm_KeyUp(object sender, KeyEventArgs e)
+        private void NotificationForm_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Escape)
             {

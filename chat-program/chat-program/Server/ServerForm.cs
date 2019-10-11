@@ -112,10 +112,12 @@ namespace ChatProgram.Server
 
         public ConnectionManager Server;
 
-        private void txtMessage_KeyUp(object sender, KeyEventArgs e)
+        private void txtMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Enter)
             {
+                e.SuppressKeyPress = true;
+                e.Handled = true;
                 if(txtMessage.Text.StartsWith("/token "))
                 {
                     string key = txtMessage.Text.Replace("/token ", "");
@@ -137,6 +139,7 @@ namespace ChatProgram.Server
 
         private void ServerForm_Load(object sender, EventArgs e)
         {
+            this.Text = Program.GetIPAddress();
             gbMessages.BringToFront();
             var token = Program.GetRegistry("apiKey", "");
             if(string.IsNullOrWhiteSpace(token))
@@ -160,6 +163,15 @@ namespace ChatProgram.Server
 
         void doSetIPOnBot(string token)
         {
+            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (var pp in host.AddressList)
+            {
+                var msg = new Classes.Message();
+                msg.Author = SERVERUSER;
+                msg.Content = pp.ToString();
+                msg.Colour = Color.Cyan;
+                Server_NewMessage(this, msg);
+            }
             var ip = Program.GetIPAddress();
             using(HttpClient client = new HttpClient())
             {
