@@ -14,6 +14,7 @@ namespace ChatProgram.Server
 {
     public partial class ServerForm : Form
     {
+        public CommandManager Commands;
         public ServerForm()
         {
             InitializeComponent();
@@ -26,6 +27,11 @@ namespace ChatProgram.Server
             SERVERUSER.Id = 999;
             SERVERUSER.Name = "Server";
             Common.Users[SERVERUSER.Id] = SERVERUSER;
+
+            Commands = new CommandManager();
+            Commands.LoadCommands();
+            Commands.LoadTypeParsers();
+
             Logger.LogMsg("Server start finished");
         }
 
@@ -59,7 +65,7 @@ namespace ChatProgram.Server
             var msg = new Classes.Message();
             msg.Author = SERVERUSER;
             msg.Id = Common.IterateMessageId();
-            msg.Content = $"{e.Name} has connected";
+            msg.Content = $"{e.Name} ({e.Id}) has connected";
             msg.Colour = Color.Red;
             Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
             Server_NewMessage(this, msg);
@@ -98,6 +104,10 @@ namespace ChatProgram.Server
                 return;
             }
             var lbl = getLabelFor(e, ref MESSAGE_Y);
+            if (e.Content.StartsWith("/") && e.Colour == Color.Black)
+                lbl.ForeColor = Color.Coral;
+            else
+                lbl.ForeColor = e.Colour;
             lbl.Click += msg_click;
             gbMessages.Controls.Add(lbl);
         }
@@ -116,21 +126,16 @@ namespace ChatProgram.Server
         {
             if(e.KeyCode == Keys.Enter)
             {
-                if(txtMessage.Text.StartsWith("/token "))
-                {
-                    string key = txtMessage.Text.Replace("/token ", "");
-                    Program.SetRegistry("apiKey", key);
-                    var reply = new Classes.Message();
-                    reply.Author = SERVERUSER;
-                    reply.Colour = Color.Blue;
-                    reply.Content = $"API token was set to {key}, reopen server to take effect";
-                    Server_NewMessage(this, reply);
-                    return;
-                }
                 var msg = new Classes.Message() { Author = SERVERUSER, Content = txtMessage.Text };
                 msg.Id = Common.IterateMessageId();
-                Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
                 Server._internalServerMessage(msg);
+                if(txtMessage.Text.StartsWith("/"))
+                {
+                    Commands.Execute(msg);
+                } else
+                {
+                    Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
+                }
                 txtMessage.Text = "";
             }
         }
@@ -160,24 +165,31 @@ namespace ChatProgram.Server
 
         void doSetIPOnBot(string token)
         {
-            var ip = Program.GetIPAddress();
-            using(HttpClient client = new HttpClient())
+            var msg = new Classes.Message();
+            msg.Author = SERVERUSER;
+            msg.Colour = Color.Blue;
+            msg.Content = "Internal error occured when performing api POST.";
+            try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, $"{Program.APIBASE}/chat/ip?value={ip}&token={token}");
-                var response = client.SendAsync(request).Result;
-                var msg = new Classes.Message();
-                msg.Author = SERVERUSER;
-                msg.Colour = Color.Blue;
-                if(response.IsSuccessStatusCode)
+                var ip = Program.GetIPAddress();
+                using(HttpClient client = new HttpClient())
                 {
-                    msg.Content = $"API reports IP was correctly set.";
-                } else
-                {
-                    msg.Colour = Color.DarkCyan;
-                    msg.Content = $"API reports error: {response.StatusCode} :: {response.Content.ReadAsStringAsync().Result}";
+                    var request = new HttpRequestMessage(HttpMethod.Post, $"{Program.APIBASE}/chat/ip?value={ip}&token={token}");
+                    var response = client.SendAsync(request).Result;
+                    if(response.IsSuccessStatusCode)
+                    {
+                        msg.Content = $"API reports IP was correctly set.";
+                    } else
+                    {
+                        msg.Colour = Color.DarkCyan;
+                        msg.Content = $"API reports error: {response.StatusCode} :: {response.Content.ReadAsStringAsync().Result}";
+                    }
                 }
-                Server_NewMessage(this, msg);
+            } catch (Exception ex)
+            {
+                msg.Content = ex.Message;
             }
+            Server_NewMessage(this, msg);
         }
 
         private void heartBeatTimer_Tick(object sender, EventArgs e)
@@ -209,6 +221,22 @@ namespace ChatProgram.Server
             ChatProgram.Menu.Server = null;
             Server = null;
             ChatProgram.Menu.INSTANCE.Show();
+        }
+
+        const int WM_SYSCOMMAND = 0x0112, SC_MONITORPOWER = 0xF170;
+
+        protected override void WndProc(ref System.Windows.Forms.Message m)
+        {
+            Logger.LogMsg($"{m} {m.Msg}");
+            if (m.Msg == WM_SYSCOMMAND) //Intercept System Command
+            {
+                if ((m.WParam.ToInt32() & 0xFFF0) == SC_MONITORPOWER)
+                { //Intercept Monitor Power Message
+                    Logger.LogMsg($"Monitor was turned off");
+                }
+
+            }
+            base.WndProc(ref m);
         }
     }
 }

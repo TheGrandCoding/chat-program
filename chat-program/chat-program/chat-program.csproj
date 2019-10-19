@@ -97,6 +97,15 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\CommandManager.cs" />
+    <Compile Include="Server\Commands\APIModule.cs" />
+    <Compile Include="Server\Commands\Attributes\GroupAttribute.cs" />
+    <Compile Include="Server\Commands\Attributes\NameAttribute.cs" />
+    <Compile Include="Server\Commands\Attributes\PriorityAttribute.cs" />
+    <Compile Include="Server\Commands\Attributes\RequireServerAttribute.cs" />
+    <Compile Include="Server\Commands\Attributes\ValueAttribute.cs" />
+    <Compile Include="Server\Commands\PMModule.cs" />
+    <Compile Include="Server\Commands\RandomModule.cs" />
     <Compile Include="Server\ConnectionManager.cs" />
     <Compile Include="Server\ServerForm.cs">
       <SubType>Form</SubType>
@@ -104,6 +113,9 @@
     <Compile Include="Server\ServerForm.Designer.cs">
       <DependentUpon>ServerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Server\TypeParsers\DefaultTypeParsers.cs" />
+    <Compile Include="Server\TypeParsers\TypeParser.cs" />
+    <Compile Include="Server\TypeParsers\UserTypeParser.cs" />
     <EmbeddedResource Include="Client\ClientForm.resx">
       <DependentUpon>ClientForm.cs</DependentUpon>
     </EmbeddedResource>

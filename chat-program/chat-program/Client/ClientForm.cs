@@ -15,7 +15,7 @@ namespace ChatProgram.Client
     public partial class ClientForm : Form
     {
         public ClientForm()
-        {
+        { 
             InitializeComponent();
             Client = new ClientConnection(this, Disconnected);
             Logger.LogMsg("Client started");
@@ -94,8 +94,16 @@ namespace ChatProgram.Client
             Client_UserListChange(this, null);
         }
 
-        private void Client_UserListChange(object sender, Classes.User e)
+        public void Client_UserListChange(object sender, Classes.User e)
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    Client_UserListChange(sender, e);
+                }));
+                return;
+            }
             if(e != null)
                 Common.Users[e.Id] = e;
             gbUsers.Controls.Clear();

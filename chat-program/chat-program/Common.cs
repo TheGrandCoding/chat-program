@@ -11,6 +11,7 @@ namespace ChatProgram
     {
         public static Dictionary<uint, User> Users = new Dictionary<uint, User>();
 
+        public static Random RND = new Random(DateTime.Now.Millisecond);
 
         static uint _userIdNoTouchy = 0;
         public static uint USER_ID 
@@ -72,6 +73,15 @@ namespace ChatProgram
                     return r;
             }
             return getUserWhenNotCached(id);
+        }
+
+        public static User GetUser(string name)
+        {
+            lock(Users)
+            {
+                return Users.Values.LastOrDefault(x => x.Name == name);
+            }
+            return null;
         }
 
 

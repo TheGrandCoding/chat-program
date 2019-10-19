@@ -64,22 +64,28 @@ namespace ChatProgram
             }
         }
 
-        public const string APIBASE = "http://localhost:8887";
+        public const string APIBASE = "https://ml-api.uk.ms:8887";
 
         static void getServerDefaltIp()
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, $"{APIBASE}/chat/ip");
-                var response = client.SendAsync(request).Result;
-                if (response.IsSuccessStatusCode)
+                using (HttpClient client = new HttpClient())
                 {
-                    string text = response.Content.ReadAsStringAsync().Result;
-                    if(IPAddress.TryParse(text, out var addr))
+                    var request = new HttpRequestMessage(HttpMethod.Get, $"{APIBASE}/chat/ip");
+                    var response = client.SendAsync(request).Result;
+                    if (response.IsSuccessStatusCode)
                     {
-                        DefaultIP = addr.ToString();
+                        string text = response.Content.ReadAsStringAsync().Result;
+                        if(IPAddress.TryParse(text, out var addr))
+                        {
+                            DefaultIP = addr.ToString();
+                        }
                     }
                 }
+            } catch (Exception ex)
+            {
+                Logger.LogMsg(ex.ToString(), LogSeverity.Error);
             }
             if (string.IsNullOrWhiteSpace(DefaultIP))
                 DefaultIP = "127.0.0.1";
@@ -108,6 +114,8 @@ namespace ChatProgram
             }
             return null;
         }
+
+
 
     }
 }

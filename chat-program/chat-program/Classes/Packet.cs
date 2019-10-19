@@ -36,17 +36,65 @@ namespace ChatProgram.Classes
 
     public enum PacketId
     {
-        // From-Server Packets
+        /// <summary>
+        /// Sent to verify connection is still active
+        /// </summary>
         HEARTBEAT,
+        // -----------------------------
+        // ---- From-Server Packets ----
+        // -----------------------------
+        /// <summary>
+        /// Server indicates that a new message has been made
+        /// <para>Content: <see cref="Message"/></para>
+        /// </summary>
         NewMessage,
+        /// <summary>
+        /// Indicates that a user has joined the server
+        /// <para>Content: <see cref="User"/></para>
+        /// </summary>
         UserJoined,
+        /// <summary>
+        /// Indicates that a user has disconnected from the server
+        /// <para>Content: <see cref="User"/></para>
+        /// </summary>
         UserLeft,
+        /// <summary>
+        /// Indicates that a user has been modified in some way
+        /// <para>Content: <see cref="User"/></para>
+        /// </summary>
         UserUpdate,
+        /// <summary>
+        /// Indicates that a specific message has been modified in some way
+        /// <para>Content: <see cref="ChatProgram.Classes.Message"/></para>
+        /// </summary>
         MessageEdited,
+        /// <summary>
+        /// Informs a newly connected client of their user (thus, their id)
+        /// <para>Content: <see cref="User"/></para>
+        /// </summary>
         GiveIdentity,
-        // From-Client Packets
+        /// <summary>
+        /// Authorative order from Server for the Client to set their monitor state
+        /// <para>Content: <see cref="bool"/></para>
+        /// </summary>
+        SetMonitorState,
+        // -----------------------------
+        // ---- From-Client Packets ----
+        // -----------------------------
+        /// <summary>
+        /// Informs Server that client is connecting
+        /// </summary>
+        [Obsolete]
         Connect,
+        /// <summary>
+        /// Informs the Server that the client is disconnecting
+        /// <para>Content: null</para>
+        /// </summary>
         Disconnect,
+        /// <summary>
+        /// Informs the Server that the client would like to post a message to the Server.
+        /// <para>Content: <see cref="Message"/> (lacks proper Id, which is set by Server)</para>
+        /// </summary>
         SendMessage
     }
 }
