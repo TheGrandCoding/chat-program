@@ -184,6 +184,26 @@ namespace ChatProgram.Server
             {
                 var msg = new Message();
                 msg.FromJson(packet.Information);
+                if(msg.Content.Length > 256)
+                {
+                    msg = new Message();
+                    msg.Content = $"Error: Message was too long";
+                    msg.Author = Menu.Server.SERVERUSER;
+                    msg.Colour = System.Drawing.Color.Red;
+                    SendTo(user, new Packet(PacketId.NewMessage, msg.ToJson()));
+                    return;
+                }
+                if(user.SavedValues.TryGetValue("muted", out var val) && bool.TryParse(val, out var muted) && muted)
+                {
+                    msg = new Message();
+                    msg.Content = $"Error: you are muted";
+                    msg.Author = Menu.Server.SERVERUSER;
+                    msg.Colour = System.Drawing.Color.Red;
+                    SendTo(user, new Packet(PacketId.NewMessage, msg.ToJson()));
+                    return;
+                }
+
+
                 msg.Id = Common.IterateMessageId();
                 NewMessage?.Invoke(this, msg); // so Server can see all messages
                 if(msg.Content.StartsWith("/"))

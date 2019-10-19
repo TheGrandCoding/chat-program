@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -63,6 +64,7 @@ namespace ChatProgram.Client
                 Client.IdentityKnown += Client_UserListChange;
                 Client.UserUpdate += Client_UserListChange;
                 Client.UserDisconnected += Client_UserDisconnected;
+                Client.SetMonitorState += Client_SetMonitorState;
                 Client.Send(Environment.UserName);
                 Logger.LogMsg("Sent username, opened listener");
                 Client.Listen();
@@ -77,6 +79,37 @@ namespace ChatProgram.Client
             }
         }
 
+        [DllImport("user32.dll")]
+        public static extern bool LockWorkStation();
+
+        private int SC_MONITORPOWER = 0xF170;
+        private uint WM_SYSCOMMAND = 0x0112;
+
+        [DllImport("user32.dll")]
+        static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+
+        private void Client_SetMonitorState(object sender, bool e)
+        {
+            if(e)
+            { // ?
+            } else
+            { // lock computer
+                if(ChatProgram.Menu.Server == null)
+                {
+                    // only lock for non-local clients.
+                    try
+                    {
+                        SendMessage(this.Handle, WM_SYSCOMMAND, (IntPtr)SC_MONITORPOWER, (IntPtr)2);
+                        LockWorkStation();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
+                }
+            }
+        }
 
         Label createLabelFor(User u, ref int y)
         {
@@ -136,7 +169,7 @@ namespace ChatProgram.Client
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
             lbl.Location = new Point(5, y_offset);
-            y += 20;
+            y += 5;
             return lbl;
         }
         public void ClientForm_Activated(object sender, EventArgs e)
@@ -162,6 +195,7 @@ namespace ChatProgram.Client
         private void Client_NewMessage(object sender, Classes.Message e)
         {
             var lbl = getLabelFor(e, ref MESSAGE_Y);
+            int width = lbl.Height;
             lbl.ForeColor = e.Colour;
             lbl.Click += Lbl_Click;
             if(Form.ActiveForm == this)
@@ -177,13 +211,8 @@ namespace ChatProgram.Client
                 }
             }
             this.gbMessages.Controls.Add(lbl);
-            int charactors = lbl.Text.Length;
-            var rows = charactors / 80d;
-            while(rows > 0)
-            {
-                MESSAGE_Y += 5;
-                rows--;
-            }
+            width = lbl.Height;
+            MESSAGE_Y += width;
         }
 
         private void Lbl_Click(object sender, EventArgs e)

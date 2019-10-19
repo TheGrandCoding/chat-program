@@ -104,6 +104,8 @@
     <Compile Include="Server\Commands\Attributes\PriorityAttribute.cs" />
     <Compile Include="Server\Commands\Attributes\RequireServerAttribute.cs" />
     <Compile Include="Server\Commands\Attributes\ValueAttribute.cs" />
+    <Compile Include="Server\Commands\HelpModule.cs" />
+    <Compile Include="Server\Commands\AdminModule.cs" />
     <Compile Include="Server\Commands\PMModule.cs" />
     <Compile Include="Server\Commands\RandomModule.cs" />
     <Compile Include="Server\ConnectionManager.cs" />

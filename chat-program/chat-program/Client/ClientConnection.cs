@@ -19,6 +19,8 @@ namespace ChatProgram.Client
         public event EventHandler<User> IdentityKnown;
         public event EventHandler<User> UserUpdate;
 
+        public event EventHandler<bool> SetMonitorState;
+
         public User CurrentUser;
 
         public ClientConnection(ClientForm form, Func<Connection, Exception, Task> callback) : base ("Server", callback)
@@ -65,6 +67,13 @@ namespace ChatProgram.Client
                 Form.Invoke(new Action(() =>
                 {
                     UserDisconnected?.Invoke(this, usr);
+                }));
+            } else if(packet.Id == PacketId.SetMonitorState)
+            {
+                var state = packet.Information["state"].ToObject<bool>();
+                Form.Invoke(new Action(() =>
+                {
+                    SetMonitorState?.Invoke(this, state);
                 }));
             }
         }

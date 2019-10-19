@@ -324,6 +324,24 @@ namespace ChatProgram.Server
                 Context.Server.Server.SendTo(Context.User, packet);
             }
         }
+
+        protected virtual void SendTo(Classes.User user, string message, System.Drawing.Color? color = null)
+        {
+            var msg = new Classes.Message();
+            msg.Colour = color ?? Color.Black;
+            msg.Author = Context.ServerUser;
+            msg.Content = message;
+            msg.Id = Common.IterateMessageId();
+            if (user.Id == Context.ServerUser.Id)
+            {
+                Context.Server.Server._internalServerMessage(msg);
+            }
+            else
+            {
+                var packet = new Classes.Packet(Classes.PacketId.NewMessage, msg.ToJson());
+                Context.Server.Server.SendTo(user, packet);
+            }
+        }
     }
 
     public class Command
