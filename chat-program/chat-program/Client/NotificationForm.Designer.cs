@@ -65,7 +65,7 @@
             this.txtReply.Size = new System.Drawing.Size(385, 22);
             this.txtReply.TabIndex = 2;
             this.txtReply.TextChanged += new System.EventHandler(this.txtReply_TextChanged);
-            this.txtReply.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtReply_KeyUp);
+            this.txtReply.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtReply_KeyDown);
             // 
             // timeoutTimer
             // 
@@ -104,7 +104,7 @@
             this.Text = "New Message";
             this.Activated += new System.EventHandler(this.NotificationForm_Activated);
             this.LocationChanged += new System.EventHandler(this.NotificationForm_LocationChanged);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.NotificationForm_KeyUp);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.NotificationForm_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -44,7 +44,7 @@ namespace ChatProgram
 
         public static string DefaultIP = "";
 
-        public const int Port = 6098;
+        public const int Port = 8889;
 
         /// <summary>
         /// The main entry point for the application.
@@ -64,7 +64,7 @@ namespace ChatProgram
             }
         }
 
-        public const string APIBASE = "https://ml-api.uk.ms:8887";
+        public const string APIBASE = "https://ml-api.uk.ms";
 
         static void getServerDefaltIp()
         {
@@ -77,10 +77,14 @@ namespace ChatProgram
                     if (response.IsSuccessStatusCode)
                     {
                         string text = response.Content.ReadAsStringAsync().Result;
-                        if(IPAddress.TryParse(text, out var addr))
+                        if (IPAddress.TryParse(text, out var addr))
                         {
                             DefaultIP = addr.ToString();
                         }
+                    } else
+                    {
+                        var str = response.Content.ReadAsStringAsync().Result;
+                        Logger.LogMsg(str, LogSeverity.Error);
                     }
                 }
             } catch (Exception ex)

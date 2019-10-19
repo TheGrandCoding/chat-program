@@ -84,14 +84,14 @@ namespace ChatProgram.Server
 
         Label getLabelFor(Classes.Message message, ref int y)
         {
-            int y_offset = y - gbMessages.VerticalScroll.Value; ;
+            int y_offset = y - gbMessages.VerticalScroll.Value;
             var lbl = new Label();
             lbl.Text = $"{message.Author.Name}: {message.Content}";
             lbl.Tag = message;
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
             lbl.Location = new Point(5, y_offset);
-            y += 20;
+            y += 5;
             return lbl;
         }
 
@@ -104,12 +104,15 @@ namespace ChatProgram.Server
                 return;
             }
             var lbl = getLabelFor(e, ref MESSAGE_Y);
+            int height = lbl.Height;
             if (e.Content.StartsWith("/") && e.Colour == Color.Black)
                 lbl.ForeColor = Color.Coral;
             else
                 lbl.ForeColor = e.Colour;
             lbl.Click += msg_click;
             gbMessages.Controls.Add(lbl);
+            height = lbl.Height;
+            MESSAGE_Y += height;
         }
 
         private void msg_click(object sender, EventArgs e)
@@ -122,7 +125,7 @@ namespace ChatProgram.Server
 
         public ConnectionManager Server;
 
-        private void txtMessage_KeyUp(object sender, KeyEventArgs e)
+        private void txtMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Enter)
             {
@@ -142,6 +145,7 @@ namespace ChatProgram.Server
 
         private void ServerForm_Load(object sender, EventArgs e)
         {
+            this.Text = Program.GetIPAddress();
             gbMessages.BringToFront();
             var token = Program.GetRegistry("apiKey", "");
             if(string.IsNullOrWhiteSpace(token))
@@ -170,7 +174,8 @@ namespace ChatProgram.Server
             msg.Colour = Color.Blue;
             msg.Content = "Internal error occured when performing api POST.";
             try
-            {
+            { 
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
                 var ip = Program.GetIPAddress();
                 using(HttpClient client = new HttpClient())
                 {
