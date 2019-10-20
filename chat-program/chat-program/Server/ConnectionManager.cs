@@ -71,9 +71,15 @@ namespace ChatProgram.Server
             }
             return false;
         }
+
         public bool SendTo(Classes.User usr, Packet packet)
         {
             return SendTo(usr.Id, packet);
+        }
+
+        public bool TryGetConnection(User user, out Connection connection)
+        {
+            return Connections.TryGetValue(user.Id, out connection);
         }
 
         public void PrivateMessage(Classes.User from, User to, string message)
@@ -81,17 +87,17 @@ namespace ChatProgram.Server
             var msg = new Message();
             msg.Author = Menu.Server.SERVERUSER;
             msg.Colour = System.Drawing.Color.Gold;
-            msg.Content = $"[PM] {from.Name}({from.Id}) -> me: {message}";
+            msg.Content = $"[PM] {from.DisplayName}({from.Id}) -> me: {message}";
             msg.Id = Common.IterateMessageId();
             SendTo(to, new Packet(PacketId.NewMessage, msg.ToJson()));
 
             msg.Colour = System.Drawing.Color.Gray;
             msg.Id = Common.IterateMessageId();
-            msg.Content = $"[PM] me -> {to.Name}({to.Id}): {message}";
+            msg.Content = $"[PM] me -> {to.DisplayName}({to.Id}): {message}";
             SendTo(from, new Packet(PacketId.NewMessage, msg.ToJson()));
 
             msg.Id = Common.IterateMessageId();
-            msg.Content = $"[PM] {from.Name}({from.Id}) -> {to.Name}({to.Id}): {message}";
+            msg.Content = $"[PM] {from.DisplayName}({from.Id}) -> {to.UserName}({to.Id}): {message}";
             _internalServerMessage(msg);
         }
 
@@ -122,7 +128,7 @@ namespace ChatProgram.Server
 
                 var nClient = new User();
                 nClient.Id = Common.USER_ID++;
-                nClient.Name = data;
+                nClient.UserName = data;
                 Logger.LogMsg($"New User: '{data}' ({nClient.Id})");
                 Common.Users[nClient.Id] = nClient;
                 var conn = new Connection(nClient.Id.ToString(), HandleConnDisconnect);
@@ -162,7 +168,7 @@ namespace ChatProgram.Server
                 {
                     if(Common.Users.TryGetValue(id, out var user))
                     {
-                        Logger.LogMsg($"From {user.Name}({user.Id}): {e}");
+                        Logger.LogMsg($"From {user.UserName}({user.Id}): {e}");
                         Form.Invoke(new Action(() => {
                             var packet = new Packet(e);
                             HandleConnMessage(connection, user, packet);
@@ -188,6 +194,15 @@ namespace ChatProgram.Server
                 {
                     msg = new Message();
                     msg.Content = $"Error: Message was too long";
+                    msg.Author = Menu.Server.SERVERUSER;
+                    msg.Colour = System.Drawing.Color.Red;
+                    SendTo(user, new Packet(PacketId.NewMessage, msg.ToJson()));
+                    return;
+                }
+                if(string.IsNullOrWhiteSpace(msg.Content))
+                {
+                    msg = new Message();
+                    msg.Content = $"Error: Message was empty, whitespace or null.";
                     msg.Author = Menu.Server.SERVERUSER;
                     msg.Colour = System.Drawing.Color.Red;
                     SendTo(user, new Packet(PacketId.NewMessage, msg.ToJson()));
@@ -239,10 +254,10 @@ namespace ChatProgram.Server
                 {
                     Connections.Remove(id);
                     // Dont remove from users, since that might be helpful to keep
-                    Logger.LogMsg($"Disconnect on {id} {user.Name}");
+                    Logger.LogMsg($"Disconnect on {id} {user.UserName}");
                     Form.Invoke(new Action(() => {
                         var msg = new Classes.Message();
-                        msg.Content = $"{user.Name} ({user.Id}) has disconnected";
+                        msg.Content = $"{user.DisplayName} ({user.Id}) has disconnected";
                         msg.Colour = System.Drawing.Color.Red;
                         msg.Author = Form.SERVERUSER;
                         msg.Id = Common.IterateMessageId();

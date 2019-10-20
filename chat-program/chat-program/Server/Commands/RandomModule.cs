@@ -14,7 +14,7 @@ namespace ChatProgram.Server.Commands
         public void RollADice()
         {
             var val = Common.RND.Next(1, 7);
-            BroadCast($"{Context.User.Name}({Context.User.Id}) rolled a {val}", System.Drawing.Color.Purple);
+            BroadCast($"{Context.User.DisplayName}({Context.User.Id}) rolled a {val}", System.Drawing.Color.Purple);
         }
 
         [Name("dice")]
@@ -22,7 +22,7 @@ namespace ChatProgram.Server.Commands
         public void RollANSidedDice(int sides)
         {
             var val = Common.RND.Next(1, sides + 1);
-            BroadCast($"{Context.User.Name}({Context.User.Id}) rolled a {val} (d{sides})", System.Drawing.Color.Purple);
+            BroadCast($"{Context.User.DisplayName}({Context.User.Id}) rolled a {val} (d{sides})", System.Drawing.Color.Purple);
         }
 
         [Name("dice")]
@@ -46,7 +46,7 @@ namespace ChatProgram.Server.Commands
                     int[] rolls = new int[dices];
                     for (int i = 0; i < dices; i++)
                         rolls[i] = Common.RND.Next(1, sides + 1);
-                    BroadCast($"{Context.User.Name}({Context.User.Id}) rolled [{string.Join(", ", rolls)}] sum {rolls.Sum()} of {dices}d{sides}", System.Drawing.Color.Purple);
+                    BroadCast($"{Context.User.DisplayName}({Context.User.Id}) rolled [{string.Join(", ", rolls)}] sum {rolls.Sum()} of {dices}d{sides}", System.Drawing.Color.Purple);
                 }
             }
         }
@@ -56,11 +56,11 @@ namespace ChatProgram.Server.Commands
         {
             var dble = Common.RND.NextDouble();
             if(dble > 0.5)
-                BroadCast($"{Context.User.Name}({Context.User.Id}) flipped coin on heads", System.Drawing.Color.Purple);
+                BroadCast($"{Context.User.DisplayName}({Context.User.Id}) flipped coin on heads", System.Drawing.Color.Purple);
             else if (dble < 0.5)
-                BroadCast($"{Context.User.Name}({Context.User.Id}) flipped coin on tails", System.Drawing.Color.Purple);
+                BroadCast($"{Context.User.DisplayName}({Context.User.Id}) flipped coin on tails", System.Drawing.Color.Purple);
             else
-                BroadCast($"{Context.User.Name}({Context.User.Id}) flipped coin on its side", System.Drawing.Color.Purple);
+                BroadCast($"{Context.User.DisplayName}({Context.User.Id}) flipped coin on its side", System.Drawing.Color.Purple);
         }
     }
 }

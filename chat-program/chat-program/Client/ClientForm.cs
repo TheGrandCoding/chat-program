@@ -22,6 +22,8 @@ namespace ChatProgram.Client
             Logger.LogMsg("Client started");
         }
 
+        public bool AllowInteract = true;
+
         public ClientConnection Client;
 
         Task Disconnected(Connection conn, Exception ex)
@@ -38,9 +40,9 @@ namespace ChatProgram.Client
                 return Task.CompletedTask;
             }
 
-            ChatProgram.Menu.Client = null;
-            ChatProgram.Menu.INSTANCE.Show();
-            this.Close();
+            this.txtMessage.Enabled = false;
+            AllowInteract = false;
+            this.Text += " | Connection Closed";
             MessageBox.Show((ex?.Message ?? "Client disconnected from server connection for an unknown reason"), "Disconnected", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return Task.CompletedTask;
         }
@@ -68,7 +70,7 @@ namespace ChatProgram.Client
                 Client.Send(Environment.UserName);
                 Logger.LogMsg("Sent username, opened listener");
                 Client.Listen();
-                Common.Users[999] = new User() { Id = 999, Name = "Server" };
+                Common.Users[999] = new User() { Id = 999, UserName = "Server" };
                 this.Activated += ClientForm_Activated;
                 return true;
             } else
@@ -107,6 +109,19 @@ namespace ChatProgram.Client
                     {
                         MessageBox.Show(ex.ToString());
                     }
+                } else
+                {
+                    Client_NewMessage(this, new Classes.Message()
+                    {
+                        Author = new User()
+                        {
+                            UserName = "(Client)",
+                            Id = 0
+                        },
+                        Colour = Color.Red,
+                        Content = $"Would lockdown, but local client",
+                        Id = 0
+                    });
                 }
             }
         }
@@ -116,7 +131,7 @@ namespace ChatProgram.Client
             int x = 5;
             var label = new Label();
             label.Tag = u;
-            label.Text = $"#{u.Id} {u.Name}";
+            label.Text = $"#{u.Id} {u.UserName} {u.NickName}";
             label.Location = new Point(x, y);
             y += 30;
             return label;
@@ -145,6 +160,8 @@ namespace ChatProgram.Client
             foreach (var user in users)
             {
                 var lbl = createLabelFor(user.Value, ref y);
+                lbl.AutoSize = true;
+                lbl.MaximumSize = new Size(gbUsers.Size.Width - 5, 15);
                 lbl.TextAlign = ContentAlignment.TopCenter;
                 gbUsers.Controls.Add(lbl);
                 lbl.Click += user_click;
@@ -163,8 +180,8 @@ namespace ChatProgram.Client
         Label getLabelFor(Classes.Message message, ref int y)
         {
             int y_offset = y - gbMessages.VerticalScroll.Value;
-            var lbl = new Label();
-            lbl.Text = $"{message.Author.Name}: {message.Content}";
+            var lbl = new FormatLabel(message, gbMessages);
+            lbl.Text = $"{message.Author.DisplayName}: {message.Content}";
             lbl.Tag = message;
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
@@ -219,7 +236,7 @@ namespace ChatProgram.Client
         {
             if(sender is Label lbl && lbl.Tag is Classes.Message msg)
             {
-                MessageBox.Show(msg.Content, $"#{msg.Id} from {msg.Author.Name}");
+                MessageBox.Show(msg.Content, $"#{msg.Id} from {msg.Author.UserName} ({msg.Author.Id}) {msg.Author.NickName}");
             }
         }
 
@@ -229,6 +246,8 @@ namespace ChatProgram.Client
             {
                 e.SuppressKeyPress = true;
                 e.Handled = true;
+                if (string.IsNullOrWhiteSpace(txtMessage.Text))
+                    return;
                 var msg = new Classes.Message() { Author = Client.CurrentUser, Content = txtMessage.Text };
                 txtMessage.Text = "";
                 var pcket = new Packet(PacketId.SendMessage, msg.ToJson());

@@ -44,7 +44,7 @@ namespace ChatProgram.Client
         public void Show(Classes.Message message)
         {
             MESSAGE_ID = message.Id;
-            lblFrom.Text = $"From {message.Author.Name}";
+            lblFrom.Text = $"From {message.Author.DisplayName}";
             lblMessage.Text = message.Content;
             timeoutTimer.Start();
             var loc = OpenLocation;

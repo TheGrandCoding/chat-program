@@ -40,6 +40,12 @@ namespace ChatProgram.Classes
         /// Sent to verify connection is still active
         /// </summary>
         HEARTBEAT,
+        /// <summary>
+        /// If sent by Server, Client should disconnect.
+        /// If sent by Client, Server assumes Client is disconnecting
+        /// <para>Content: null</para>
+        /// </summary>
+        Disconnect,
         // -----------------------------
         // ---- From-Server Packets ----
         // -----------------------------
@@ -86,11 +92,6 @@ namespace ChatProgram.Classes
         /// </summary>
         [Obsolete]
         Connect,
-        /// <summary>
-        /// Informs the Server that the client is disconnecting
-        /// <para>Content: null</para>
-        /// </summary>
-        Disconnect,
         /// <summary>
         /// Informs the Server that the client would like to post a message to the Server.
         /// <para>Content: <see cref="Message"/> (lacks proper Id, which is set by Server)</para>

@@ -25,7 +25,7 @@ namespace ChatProgram.Server
             Server.NewUser += Server_NewUser;
             SERVERUSER = new User();
             SERVERUSER.Id = 999;
-            SERVERUSER.Name = "Server";
+            SERVERUSER.UserName = "Server";
             Common.Users[SERVERUSER.Id] = SERVERUSER;
 
             Commands = new CommandManager();
@@ -43,7 +43,7 @@ namespace ChatProgram.Server
             int x = 5;
             var label = new Label();
             label.Tag = u;
-            label.Text = $"#{u.Id} {u.Name}";
+            label.Text = $"#{u.Id} {u.UserName}";
             label.Location = new Point(x, y);
             y += 30;
             return label;
@@ -65,7 +65,7 @@ namespace ChatProgram.Server
             var msg = new Classes.Message();
             msg.Author = SERVERUSER;
             msg.Id = Common.IterateMessageId();
-            msg.Content = $"{e.Name} ({e.Id}) has connected";
+            msg.Content = $"{e.UserName} ({e.Id}) has connected";
             msg.Colour = Color.Red;
             Server.Broadcast(new Packet(PacketId.NewMessage, msg.ToJson()));
             Server_NewMessage(this, msg);
@@ -86,7 +86,7 @@ namespace ChatProgram.Server
         {
             int y_offset = y - gbMessages.VerticalScroll.Value;
             var lbl = new Label();
-            lbl.Text = $"{message.Author.Name}: {message.Content}";
+            lbl.Text = $"{message.Author.UserName}: {message.Content}";
             lbl.Tag = message;
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);

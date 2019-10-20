@@ -311,7 +311,7 @@ namespace ChatProgram.Server
         protected virtual void Reply(string message, System.Drawing.Color? color = null)
         {
             var msg = new Classes.Message();
-            msg.Colour = color ?? Color.Black;
+            msg.Colour = color ?? Color.DarkGray;
             msg.Author = Context.ServerUser;
             msg.Content = message;
             msg.Id = Common.IterateMessageId();

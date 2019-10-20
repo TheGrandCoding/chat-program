@@ -38,5 +38,17 @@ namespace ChatProgram.Server.Commands
             var packet = new Packet(PacketId.SetMonitorState, jobj);
             Context.Server.Server.Broadcast(packet);
         }
+
+        [Name("kick")]
+        [RequireServer]
+        public void DisconnectClient(User user)
+        {
+            SendTo(user, $"You have been kicked", System.Drawing.Color.Red);
+            Context.Server.Server.SendTo(user.Id, new Packet(PacketId.Disconnect, new JObject()));
+            if(Context.Server.Server.TryGetConnection(user, out var conn))
+            {
+                conn.Close();
+            }
+        }
     }
 }

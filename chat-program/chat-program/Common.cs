@@ -32,7 +32,7 @@ namespace ChatProgram
         }
 
         static object IDLOCK = new object();
-        static uint _messageIdNoTouchy = 0;
+        static uint _messageIdNoTouchy = 1;
         public static uint MESSAGE_ID {  get
             {
                 lock(IDLOCK)
@@ -79,7 +79,7 @@ namespace ChatProgram
         {
             lock(Users)
             {
-                return Users.Values.LastOrDefault(x => x.Name == name);
+                return Users.Values.LastOrDefault(x => x.UserName == name);
             }
             return null;
         }

@@ -75,6 +75,9 @@ namespace ChatProgram.Client
                 {
                     SetMonitorState?.Invoke(this, state);
                 }));
+            } else if(packet.Id == PacketId.Disconnect)
+            {
+                this.Close();
             }
         }
     }
