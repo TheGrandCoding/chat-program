@@ -1,6 +1,8 @@
 ﻿using ChatProgram.Classes;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -220,6 +222,7 @@ namespace ChatProgram.Server
 
 
                 msg.Id = Common.IterateMessageId();
+                Common.AddMessage(msg);
                 NewMessage?.Invoke(this, msg); // so Server can see all messages
                 if(msg.Content.StartsWith("/"))
                 { // command, so we dont broadcast to all users
@@ -243,6 +246,29 @@ namespace ChatProgram.Server
             } else if (packet.Id == PacketId.Disconnect)
             {
                 HandleConnDisconnect(connection, new Exception("User self-disconnected"));
+            } else if(packet.Id == PacketId.RequestDeleteMessage)
+            {
+                var id = packet.Information["id"].ToObject<uint>();
+                if(Common.TryGetMessage(id, out var msg))
+                {
+                    if(msg.Author.Id != user.Id && user.Id != Menu.Server.SERVERUSER.Id)
+                    {
+                        var errMsg = new Message();
+                        errMsg.Id = 0;
+                        errMsg.Content = $"Error: Cannot delete message since you are not author";
+                        errMsg.Colour = Color.Red;
+                        SendTo(user, new Packet(PacketId.NewMessage, errMsg.ToJson()));
+                        return;
+                    }
+                    var jobj = new JObject();
+                    jobj["id"] = id;
+                    var pong = new Packet(PacketId.MessageDeleted, jobj);
+                    Broadcast(pong);
+                }
+
+            } else if (packet.Id == PacketId.RequestEditMessage)
+            {
+
             }
         }
 

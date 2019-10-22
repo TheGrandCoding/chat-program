@@ -18,6 +18,8 @@ namespace ChatProgram.Client
         public event EventHandler<User> UserDisconnected;
         public event EventHandler<User> IdentityKnown;
         public event EventHandler<User> UserUpdate;
+        public event EventHandler<uint> MessageDeleted;
+        public event EventHandler<Message> MessagedEdited;
 
         public event EventHandler<bool> SetMonitorState;
 
@@ -78,6 +80,13 @@ namespace ChatProgram.Client
             } else if(packet.Id == PacketId.Disconnect)
             {
                 this.Close();
+            } else if(packet.Id == PacketId.MessageDeleted)
+            {
+                var id = packet.Information["id"].ToObject<uint>();
+                Form.Invoke(new Action(() =>
+                {
+                    MessageDeleted?.Invoke(this, id);
+                }));
             }
         }
     }

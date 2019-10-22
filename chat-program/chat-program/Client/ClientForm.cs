@@ -22,6 +22,8 @@ namespace ChatProgram.Client
             Logger.LogMsg("Client started");
         }
 
+        public Dictionary<uint, Label> MessageLabels = new Dictionary<uint, Label>();
+
         public bool AllowInteract = true;
 
         public ClientConnection Client;
@@ -67,6 +69,7 @@ namespace ChatProgram.Client
                 Client.UserUpdate += Client_UserListChange;
                 Client.UserDisconnected += Client_UserDisconnected;
                 Client.SetMonitorState += Client_SetMonitorState;
+                Client.MessageDeleted += Client_MessageDeleted;
                 Client.Send(Environment.UserName);
                 Logger.LogMsg("Sent username, opened listener");
                 Client.Listen();
@@ -78,6 +81,28 @@ namespace ChatProgram.Client
                 MessageBox.Show($"Failed to connect to IP");
                 this.Close();
                 return false;
+            }
+        }
+
+        private void Client_MessageDeleted(object sender, uint e)
+        {
+            lock(MessageLabels)
+            {
+                if(MessageLabels.TryGetValue(e, out var lbl))
+                {
+                    string newText = "";
+                    foreach(var chr in lbl.Text)
+                    {
+                        if(chr != ' ' && chr != '(' && chr != ')' && chr != ':')
+                            newText += '█';
+                        else
+                            newText += chr;
+                    }
+                    lbl.Text = newText;
+                    lbl.ContextMenu = new ContextMenu();
+                    lbl.ContextMenu.MenuItems.Add($"Message Deleted");
+                    lbl.Tag = null;
+                }
             }
         }
 
@@ -186,9 +211,49 @@ namespace ChatProgram.Client
             lbl.AutoSize = true;
             lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
             lbl.Location = new Point(5, y_offset);
+            lbl.ContextMenu = new ContextMenu();
+            lbl.ContextMenu.Tag = message;
+            lbl.ContextMenu.MenuItems.Add($"Id: {message.Id}", putTextToClipboard);
+            lbl.ContextMenu.MenuItems.Add($"Author: {message.Author.UserName} ({message.Author.Id})", putTextToClipboard);
+            if(message.Id > 0)
+            {
+                lbl.ContextMenu.MenuItems.Add($"[Delete]", deleteMessage);
+                lbl.ContextMenu.MenuItems.Add($"[Edit]", editMessage);
+            }
             y += 5;
             return lbl;
         }
+
+        void deleteMessage(object sender, EventArgs e)
+        {
+            if(sender is MenuItem mItem && mItem.Parent.Tag is Classes.Message message)
+            {
+                var obj = new Newtonsoft.Json.Linq.JObject();
+                obj["id"] = message.Id;
+                var packet = new Packet(PacketId.RequestDeleteMessage, obj);
+                Client.Send(packet.ToString());
+            }
+        }
+
+        void editMessage(object sender, EventArgs e)
+        {
+            if(sender is MenuItem mItem && mItem.Parent.Tag is Classes.Message message)
+            {
+                MessageBox.Show("Feature yet to be added");
+            }
+        }
+
+        void putTextToClipboard(object sender, EventArgs e)
+        {
+            if(sender is MenuItem mItem && mItem.Parent.Tag is Classes.Message message)
+            {
+                if (mItem.Text.StartsWith("Id"))
+                    Clipboard.SetText(message.Id.ToString());
+                else
+                    Clipboard.SetText(message.Author.Id.ToString());
+            }
+        }
+
         public void ClientForm_Activated(object sender, EventArgs e)
         {
             uint latestMax = LAST_SEEN_MESSAGE;
@@ -211,11 +276,17 @@ namespace ChatProgram.Client
         public uint LAST_SEEN_MESSAGE = 0;
         private void Client_NewMessage(object sender, Classes.Message e)
         {
-            var lbl = getLabelFor(e, ref MESSAGE_Y);
-            int width = lbl.Height;
+            Label lbl;
+            lock(MessageLabels)
+            {
+                lbl = getLabelFor(e, ref MESSAGE_Y);
+                lbl.Click += Lbl_Click;
+                if (e.Id > 0)
+                    MessageLabels[e.Id] = lbl;
+            }
             lbl.ForeColor = e.Colour;
-            lbl.Click += Lbl_Click;
-            if(Form.ActiveForm == this)
+            int width = lbl.Height;
+            if (Form.ActiveForm == this)
             {
                 LAST_SEEN_MESSAGE = e.Id;
             } else
@@ -234,6 +305,11 @@ namespace ChatProgram.Client
 
         private void Lbl_Click(object sender, EventArgs e)
         {
+            if(e is MouseEventArgs me)
+            {
+                if (me.Button.HasFlag(MouseButtons.Right))
+                    return;
+            }
             if(sender is Label lbl && lbl.Tag is Classes.Message msg)
             {
                 MessageBox.Show(msg.Content, $"#{msg.Id} from {msg.Author.UserName} ({msg.Author.Id}) {msg.Author.NickName}");

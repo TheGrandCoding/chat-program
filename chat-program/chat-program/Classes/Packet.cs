@@ -75,6 +75,11 @@ namespace ChatProgram.Classes
         /// </summary>
         MessageEdited,
         /// <summary>
+        /// Indicates that a specific message has been removed
+        /// <para>Content: <see cref="int"/> Id</para>
+        /// </summary>
+        MessageDeleted,
+        /// <summary>
         /// Informs a newly connected client of their user (thus, their id)
         /// <para>Content: <see cref="User"/></para>
         /// </summary>
@@ -96,6 +101,16 @@ namespace ChatProgram.Classes
         /// Informs the Server that the client would like to post a message to the Server.
         /// <para>Content: <see cref="Message"/> (lacks proper Id, which is set by Server)</para>
         /// </summary>
-        SendMessage
+        SendMessage,
+        /// <summary>
+        /// Informs Server that Client wishes to remove a given message
+        /// <para>Content: <see cref="int"/> Id of Message</para>
+        /// </summary>
+        RequestDeleteMessage,
+        /// <summary>
+        /// Informs Server that Client wishes to edit a given message
+        /// <para>Content: <see cref="Message"/> Id equal to existing, Content equal to new edited content</para>
+        /// </summary>
+        RequestEditMessage
     }
 }

@@ -11,6 +11,8 @@ namespace ChatProgram
     {
         public static Dictionary<uint, User> Users = new Dictionary<uint, User>();
 
+        public static Dictionary<uint, Message> Messages = new Dictionary<uint, Message>();
+
         public static Random RND = new Random(DateTime.Now.Millisecond);
 
         static uint _userIdNoTouchy = 0;
@@ -81,7 +83,22 @@ namespace ChatProgram
             {
                 return Users.Values.LastOrDefault(x => x.UserName == name);
             }
-            return null;
+        }
+
+        public static void AddMessage(Message msg)
+        {
+            lock(IDLOCK)
+            {
+                Messages[msg.Id] = msg;
+            }
+        }
+
+        public static bool TryGetMessage(uint id, out Message msg)
+        {
+            lock(IDLOCK)
+            {
+                return Messages.TryGetValue(id, out msg);
+            }
         }
     }
 }
