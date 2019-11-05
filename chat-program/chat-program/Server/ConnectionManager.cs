@@ -254,8 +254,9 @@ namespace ChatProgram.Server
                     if(msg.Author.Id != user.Id && user.Id != Menu.Server.SERVERUSER.Id)
                     {
                         var errMsg = new Message();
+						errMsg.Author = Menu.Server.SERVERUSER;
                         errMsg.Id = 0;
-                        errMsg.Content = $"Error: Cannot delete message since you are not author";
+                        errMsg.Content = $"Error: Cannot delete message since you are not the author";
                         errMsg.Colour = Color.Red;
                         SendTo(user, new Packet(PacketId.NewMessage, errMsg.ToJson()));
                         return;

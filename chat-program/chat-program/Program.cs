@@ -68,6 +68,7 @@ namespace ChatProgram
 
         static void getServerDefaltIp()
         {
+			System.Threading.Thread.Sleep(500); // wait for menu to load
             try
             {
                 using (HttpClient client = new HttpClient())

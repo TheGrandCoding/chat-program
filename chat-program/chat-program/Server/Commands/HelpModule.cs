@@ -41,7 +41,7 @@ namespace ChatProgram.Server.Commands
                     numCommands++;
                 }
             }
-            Reply($"{numCommands} {TEXT}", System.Drawing.Color.Cyan);
+            Reply($"{numCommands} {TEXT}", System.Drawing.Color.MediumPurple);
         }
     }
 }

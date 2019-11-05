@@ -12,8 +12,6 @@ namespace ChatProgram.Client
 {
     public partial class NotificationForm : Form
     {
-
-
         public Point OpenLocation
         {
             get
@@ -43,6 +41,8 @@ namespace ChatProgram.Client
 
         public void Show(Classes.Message message)
         {
+			REMAINING = 30;
+			STARTED = 0;
             MESSAGE_ID = message.Id;
             lblFrom.Text = $"From {message.Author.DisplayName}";
             lblMessage.Text = message.Content;
@@ -76,7 +76,7 @@ namespace ChatProgram.Client
             lblTimeout.Text = $"{(REMAINING).ToString()}";
             if(REMAINING < 0)
             {
-                this.Close();
+                this.Hide();
             } else if (REMAINING > 20 && COLOR_CHANGE)
             {
                 this.BackColor = (REMAINING % 2 == 0) ? Color.Red : Color.FromKnownColor(KnownColor.Control);

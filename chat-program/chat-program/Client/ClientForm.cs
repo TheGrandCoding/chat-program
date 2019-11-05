@@ -274,6 +274,8 @@ namespace ChatProgram.Client
         }
         int MESSAGE_Y = 5;
         public uint LAST_SEEN_MESSAGE = 0;
+
+		private NotificationForm notificationForm;
         private void Client_NewMessage(object sender, Classes.Message e)
         {
             Label lbl;
@@ -294,8 +296,8 @@ namespace ChatProgram.Client
                 lbl.BackColor = Color.LightCoral;
                 if(e.Author.Id != Client.CurrentUser.Id)
                 {
-                    var notForm = new NotificationForm(this);
-                    notForm.Show(e);
+                    notificationForm = notificationForm ?? new NotificationForm(this);
+                    notificationForm.Show(e);
                 }
             }
             this.gbMessages.Controls.Add(lbl);
@@ -303,7 +305,7 @@ namespace ChatProgram.Client
             MESSAGE_Y += width;
         }
 
-        private void Lbl_Click(object sender, EventArgs e)
+		private void Lbl_Click(object sender, EventArgs e)
         {
             if(e is MouseEventArgs me)
             {

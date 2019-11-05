@@ -94,6 +94,12 @@ namespace ChatProgram.Classes
                 }
                 var font = getFont(normalFont, numBolds, numItalics);
                 string charToDraw = new string(Text[i], 1);
+				if(charToDraw == "\n")
+				{
+					posX = 0;
+					posY += lineSpacing;
+					continue;
+				}
                 g.DrawString(charToDraw, font, brush, posX, posY);
                 SizeF sizeChar = g.MeasureString(charToDraw, font);
                 posX += sizeChar.Width * 0.6f;
