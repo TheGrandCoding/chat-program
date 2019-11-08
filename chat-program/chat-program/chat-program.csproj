@@ -73,6 +73,7 @@
     <Compile Include="Classes\FormatLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Classes\Image.cs" />
     <Compile Include="Classes\Message.cs" />
     <Compile Include="Classes\Packet.cs" />
     <Compile Include="Classes\User.cs" />

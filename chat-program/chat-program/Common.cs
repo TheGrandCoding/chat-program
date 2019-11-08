@@ -13,6 +13,10 @@ namespace ChatProgram
 
         public static Dictionary<uint, Message> Messages = new Dictionary<uint, Message>();
 
+        public static Dictionary<uint, Image> Images = new Dictionary<uint, Image>();
+
+        static uint _imageIdNoTouchy = 0;
+
         public static Random RND = new Random(DateTime.Now.Millisecond);
 
         static uint _userIdNoTouchy = 0;
@@ -59,6 +63,30 @@ namespace ChatProgram
             }
         }
 
+        public static uint IterateImageId()
+        {
+            lock(IDLOCK)
+            {
+                _imageIdNoTouchy += 1;
+                return _imageIdNoTouchy - 1;
+            }
+        }
+
+        public static bool TryGetImage(uint id, out Image image)
+        {
+            lock (IDLOCK)
+            {
+                return Images.TryGetValue(id, out image);
+            }
+        }
+
+        public static void AddImage(Image image)
+        {
+            lock(IDLOCK)
+            {
+                Images[image.Id] = image;
+            }
+        }
         static User getUserWhenNotCached(uint id)
         {
             if(!Program.IsServer) // server should populate above list, so should always be able to get it

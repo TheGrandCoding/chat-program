@@ -64,6 +64,18 @@ namespace ChatProgram.Server
             }
         }
 
+        public void BroadcastExcept(Packet packet, User notSentTo)
+        {
+            foreach(var conn in Connections)
+            {
+                if(conn.Key != notSentTo.Id)
+                {
+                    conn.Value.Send(packet.ToString());
+                }
+            }
+        }
+
+
         public bool SendTo(uint id, Packet packet)
         {
             if(Connections.TryGetValue(id, out var conn))
@@ -270,6 +282,54 @@ namespace ChatProgram.Server
             } else if (packet.Id == PacketId.RequestEditMessage)
             {
 
+            } else if (packet.Id == PacketId.RequestUploadImage)
+            {
+                var image = new Classes.Image();
+                image.FromJson(packet.Information);
+                if((Menu.Client?.Client?.CurrentUser?.Id ?? (uint)0) != user.Id)
+                    Common.AddImage(image);
+                var jobj = new JObject();
+                jobj["slice"] = 0;
+                jobj["originalId"] = image.Id;
+                image.Id = Common.IterateMessageId();
+                jobj["id"] = image.Id;
+                var pongPacket = new Packet(PacketId.ImageNeedSlice, jobj);
+                SendTo(user, pongPacket);
+            } else if(packet.Id == PacketId.ImageSlice)
+            {
+                var id = packet.Information["id"].ToObject<uint>();
+                var sliceNum = packet.Information["slice"].ToObject<int>();
+                var done = packet.Information["done"].ToObject<bool>();
+                var content = packet.Information["data"].ToObject<string>();
+                if(Common.TryGetImage(id, out var image))
+                {
+                    image.Slices[sliceNum] = content;
+                    if(done)
+                    {
+                        var otherPacket = new Packet(PacketId.ImageInitialInformation, image.ToJson(true));
+                        Broadcast(otherPacket);
+                    } else
+                    {
+                        var jobj = new JObject();
+                        jobj["id"] = image.Id;
+                        jobj["slice"] = sliceNum + 1;
+                        var pongPacket = new Packet(PacketId.ImageNeedSlice, jobj);
+                        SendTo(user, pongPacket);
+                    }
+                }
+            } else if(packet.Id == PacketId.ImageNeedSlice)
+            {
+                var id = packet.Information["id"].ToObject<uint>();
+                var sliceNum = packet.Information["slice"].ToObject<int>();
+                if(Common.TryGetImage(id, out var image))
+                {
+                    var slice = image.Slices[sliceNum];
+                    var jobj = new JObject(packet.Information);
+                    jobj["done"] = (sliceNum == image.Slices.Count - 1);
+                    jobj["data"] = slice;
+                    var pongPacket = new Packet(PacketId.ImageSlice, jobj);
+                    SendTo(user, pongPacket);
+                }
             }
         }
 

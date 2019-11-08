@@ -1,9 +1,11 @@
 ﻿using ChatProgram.Classes;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -70,6 +72,7 @@ namespace ChatProgram.Client
                 Client.UserDisconnected += Client_UserDisconnected;
                 Client.SetMonitorState += Client_SetMonitorState;
                 Client.MessageDeleted += Client_MessageDeleted;
+                Client.NewImageUploaded += Client_NewImageUploaded;
                 Client.Send(Environment.UserName);
                 Logger.LogMsg("Sent username, opened listener");
                 Client.Listen();
@@ -82,6 +85,11 @@ namespace ChatProgram.Client
                 this.Close();
                 return false;
             }
+        }
+
+        private void Client_NewImageUploaded(object sender, Classes.Image e)
+        {
+
         }
 
         private void Client_MessageDeleted(object sender, uint e)
@@ -357,6 +365,36 @@ namespace ChatProgram.Client
             ChatProgram.Menu.Client = null;
             ChatProgram.Menu.INSTANCE.Show();
             Client = null;
+        }
+
+
+        static uint _imageInProgressId = 2;
+        private void btnUpload_Click(object sender, EventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.InitialDirectory = "H:\\";
+            dialog.Title = "Select Image to Upload";
+            dialog.Filter = "All files|*.*";
+            dialog.CheckFileExists = true;
+            dialog.CheckPathExists = true;
+            dialog.ShowDialog();
+            var path = System.IO.Path.GetFileName(dialog.FileName);
+            var image = new Classes.Image(path, Client.CurrentUser);
+            image.Id = _imageInProgressId++;
+            if(!Directory.Exists("Images"))
+                Directory.CreateDirectory("Images");
+
+            if (!Directory.Exists($"Images/{image.UploadedBy.Id}"))
+                Directory.CreateDirectory($"Images/{image.UploadedBy.Id}");
+
+            if (!Directory.Exists($"Images/{image.UploadedBy.Id}/{image.Id}"))
+                Directory.CreateDirectory($"Images/{image.UploadedBy.Id}/{image.Id}");
+
+            File.Copy(dialog.FileName, image.Path, true);
+            image.LoadImageIntoString();
+            var packet = new Packet(PacketId.RequestUploadImage, image.ToJson());
+            Client.Send(packet.ToString());
+            Common.AddImage(image);
         }
     }
 }

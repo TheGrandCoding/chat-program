@@ -46,6 +46,11 @@ namespace ChatProgram.Classes
         /// <para>Content: null</para>
         /// </summary>
         Disconnect,
+        /// <summary>
+        /// If sent by Server, Client should send the requested slice
+        /// If sent by Client, Server should send the requested slice.
+        /// </summary>
+        ImageNeedSlice,
         // -----------------------------
         // ---- From-Server Packets ----
         // -----------------------------
@@ -89,6 +94,14 @@ namespace ChatProgram.Classes
         /// <para>Content: <see cref="bool"/></para>
         /// </summary>
         SetMonitorState,
+        /// <summary>
+        /// Confers minmal information about an image, eg its Id, uploadedby/name
+        /// </summary>
+        ImageInitialInformation,
+        /// <summary>
+        /// Image slice responded to by request
+        /// </summary>
+        ImageSlice,
         // -----------------------------
         // ---- From-Client Packets ----
         // -----------------------------
@@ -111,6 +124,15 @@ namespace ChatProgram.Classes
         /// Informs Server that Client wishes to edit a given message
         /// <para>Content: <see cref="Message"/> Id equal to existing, Content equal to new edited content</para>
         /// </summary>
-        RequestEditMessage
+        RequestEditMessage,
+        /// <summary>
+        /// Informs Server that we are uploading an image.
+        /// <para>Content: <see cref="Image"/>Image to upload</para>
+        /// </summary>
+        RequestUploadImage,
+        /// <summary>
+        /// Sends the Server a slice of the Image.
+        /// </summary>
+        UploadImageSlice
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ChatProgram.Classes;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace ChatProgram.Client
         public event EventHandler<User> UserUpdate;
         public event EventHandler<uint> MessageDeleted;
         public event EventHandler<Message> MessagedEdited;
+        public event EventHandler<Image> NewImageUploaded;
 
         public event EventHandler<bool> SetMonitorState;
 
@@ -87,6 +89,69 @@ namespace ChatProgram.Client
                 {
                     MessageDeleted?.Invoke(this, id);
                 }));
+            } else if(packet.Id == PacketId.ImageNeedSlice)
+            { // Server needs us to send the slice.
+                var id = packet.Information["id"].ToObject<uint>();
+                var shiftedId = (uint)0;
+                if(packet.Information.TryGetValue("originalId", out var val))
+                {
+                    shiftedId = id;
+                    id = val.ToObject<uint>();
+                }
+                var sliceNum = packet.Information["slice"].ToObject<int>();
+                if(Common.Images.TryGetValue(id, out var image))
+                {
+                    if(shiftedId > 0)
+                    { // move it into the new location, remove old one. 
+                        Common.Images[id] = image;
+                    }
+                    var slice = image.Slices[sliceNum];
+                    var jobj = new JObject(packet.Information);
+                    jobj["done"] = (sliceNum == image.Slices.Count - 1);
+                    jobj["data"] = slice;
+                    var pongPacket = new Packet(PacketId.ImageSlice, jobj);
+                    Send(pongPacket.ToString());
+                }
+            } else if(packet.Id == PacketId.ImageInitialInformation)
+            {
+                var image = new Classes.Image();
+                image.FromJson(packet.Information);
+                if(Common.TryGetImage(image.Id, out var existingImage))
+                {
+                    if(existingImage.Slices.Count == image.MaximumSlices)
+                    { // We already have this image, so we dont need to download it
+                        NewImageUploaded?.Invoke(this, existingImage);
+                        return;
+                    }
+                }
+                Common.AddImage(image);
+                var jobj = new JObject();
+                jobj["id"] = image.Id;
+                jobj["slice"] = 0;
+                var response = new Packet(PacketId.ImageNeedSlice, jobj);
+                Send(response.ToString());
+            } else if(packet.Id == PacketId.ImageSlice)
+            {
+                var id = packet.Information["id"].ToObject<uint>();
+                var sliceNum = packet.Information["slice"].ToObject<int>();
+                var done = packet.Information["done"].ToObject<bool>();
+                var content = packet.Information["data"].ToObject<string>();
+                if (Common.TryGetImage(id, out var image))
+                {
+                    image.Slices[sliceNum] = content;
+                    if (done)
+                    {
+                        NewImageUploaded?.Invoke(this, image);
+                    }
+                    else
+                    {
+                        var jobj = new JObject();
+                        jobj["id"] = image.Id;
+                        jobj["slice"] = sliceNum + 1;
+                        var pongPacket = new Packet(PacketId.ImageNeedSlice, jobj);
+                        Send(pongPacket.ToString());
+                    }
+                }
             }
         }
     }
