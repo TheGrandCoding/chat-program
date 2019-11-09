@@ -61,7 +61,7 @@ namespace ChatProgram.Client
                 msg.Content = txtReply.Text;
                 var packet = new Classes.Packet(Classes.PacketId.SendMessage, msg.ToJson());
                 Client.Client.Send(packet.ToString());
-                this.Close(); // since we replied.
+                this.Hide(); // since we replied.
             }
         }
 
@@ -115,7 +115,7 @@ namespace ChatProgram.Client
         {
             if(e.KeyCode == Keys.Escape)
             {
-                this.Close();
+                this.Hide();
             }
         }
     }

@@ -64,6 +64,12 @@ namespace ChatProgram.Classes
 
         public string ImageB64String { get; set; }
 
+        public MemoryStream GetStream()
+        {
+            var bytes = Convert.FromBase64String(ImageB64String);
+            return new MemoryStream(bytes);
+        }
+
         public Dictionary<int, string> Slices { get; private set; }
 
         public override void FromJson(JObject json)
@@ -91,5 +97,14 @@ namespace ChatProgram.Classes
             obj["maximum"] = MaximumSlices;
             return obj;
         }
+
+        public void SetSlice(int index, string content)
+        {
+            Slices[index] = content;
+            string temp = string.Join("", Slices.Values);
+            if (temp.Length > ImageB64String.Length)
+                ImageB64String = temp;
+        }
+
     }
 }

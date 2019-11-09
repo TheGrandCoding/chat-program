@@ -232,7 +232,6 @@ namespace ChatProgram.Server
 
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {
-            Logger.LogMsg($"{m} {m.Msg}");
             if (m.Msg == WM_SYSCOMMAND) //Intercept System Command
             {
                 if ((m.WParam.ToInt32() & 0xFFF0) == SC_MONITORPOWER)

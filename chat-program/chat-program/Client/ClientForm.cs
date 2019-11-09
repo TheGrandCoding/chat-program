@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 namespace ChatProgram.Client
 {
     public partial class ClientForm : Form
@@ -73,6 +72,7 @@ namespace ChatProgram.Client
                 Client.SetMonitorState += Client_SetMonitorState;
                 Client.MessageDeleted += Client_MessageDeleted;
                 Client.NewImageUploaded += Client_NewImageUploaded;
+                Client.UploadStatus += Client_UploadStatus;
                 Client.Send(Environment.UserName);
                 Logger.LogMsg("Sent username, opened listener");
                 Client.Listen();
@@ -87,9 +87,68 @@ namespace ChatProgram.Client
             }
         }
 
+        private ProgressBar tempProgressBar = null;
+        private void Client_UploadStatus(object sender, UploadStatusEvent e)
+        {
+            if(tempProgressBar == null)
+            {
+                tempProgressBar = new ProgressBar();
+                tempProgressBar.Location = txtMessage.Location;
+                tempProgressBar.Size = txtMessage.Size;
+                tempProgressBar.BringToFront();
+                this.Controls.Add(tempProgressBar);
+            }
+            tempProgressBar.Maximum = e.Maximum;
+            tempProgressBar.Value = e.Current;
+            tempProgressBar.Visible = e.Remaining > 0;
+            txtMessage.Visible = e.Remaining <= 0;
+        }
+
+        PictureBox getPictureBoxFor(Classes.Image image, ref int y)
+        {
+            int y_offset = y - gbMessages.VerticalScroll.Value;
+            var pb = new PictureBox();
+            var loadedImage = System.Drawing.Image.FromStream(image.GetStream());
+            pb.Image = loadedImage;
+            pb.Location = new Point(5, y_offset);
+            pb.Tag = image;
+            pb.MaximumSize = new Size(gbMessages.Size.Width - 50, 0);
+            pb.Size = new Size(
+                Math.Min(gbMessages.Size.Width - 50, loadedImage.Width),
+                Math.Min(gbMessages.Size.Width - 50, loadedImage.Height) // maximum square
+                );
+            pb.SizeMode = PictureBoxSizeMode.Zoom;
+            pb.BackColor = Color.Gray;
+            y += 5;
+            return pb;
+        }
+
+        Label getLabelFor(Classes.Image e, ref int y)
+        {
+            int y_offset = y - gbMessages.VerticalScroll.Value;
+            var lbl = new Label();
+            lbl.Tag = e;
+            lbl.Text = $"{e.UploadedBy.DisplayName} uploaded {e.Name}:";
+            lbl.MaximumSize = new Size(gbMessages.Width - 15, 0);
+            lbl.AutoSize = true;
+            lbl.Location = new Point(5, y_offset);
+            y += 5;
+            return lbl;
+        }
+
         private void Client_NewImageUploaded(object sender, Classes.Image e)
         {
-
+            if(CurrentlyUploadingSlices > 0)
+            {
+                Client_UploadStatus(this, new UploadStatusEvent(e, e.MaximumSlices));
+                CurrentlyUploadingSlices = 0;
+            }
+            var lbl = getLabelFor(e, ref MESSAGE_Y);
+            this.gbMessages.Controls.Add(lbl);
+            MESSAGE_Y += lbl.Height;
+            var pb = getPictureBoxFor(e, ref MESSAGE_Y);
+            this.gbMessages.Controls.Add(pb);
+            MESSAGE_Y += pb.Height;
         }
 
         private void Client_MessageDeleted(object sender, uint e)
@@ -295,7 +354,7 @@ namespace ChatProgram.Client
                     MessageLabels[e.Id] = lbl;
             }
             lbl.ForeColor = e.Colour;
-            int width = lbl.Height;
+            int height = lbl.Height;
             if (Form.ActiveForm == this)
             {
                 LAST_SEEN_MESSAGE = e.Id;
@@ -309,8 +368,12 @@ namespace ChatProgram.Client
                 }
             }
             this.gbMessages.Controls.Add(lbl);
-            width = lbl.Height;
-            MESSAGE_Y += width;
+            height = lbl.Height;
+            MESSAGE_Y += height;
+            if(!UserHasSetScroll)
+            {
+                gbMessages.VerticalScroll.Value = gbMessages.VerticalScroll.Maximum;
+            }
         }
 
 		private void Lbl_Click(object sender, EventArgs e)
@@ -369,15 +432,22 @@ namespace ChatProgram.Client
 
 
         static uint _imageInProgressId = 2;
+
+        public static int CurrentlyUploadingSlices = 0;
+
         private void btnUpload_Click(object sender, EventArgs e)
         {
+            if (CurrentlyUploadingSlices > 0 && e != null)
+                return;
             var dialog = new OpenFileDialog();
             dialog.InitialDirectory = "H:\\";
             dialog.Title = "Select Image to Upload";
-            dialog.Filter = "All files|*.*";
+            dialog.Filter = "Image files|*.jpg;*.jpeg;*.png;*.gif;*.bmp";
             dialog.CheckFileExists = true;
             dialog.CheckPathExists = true;
             dialog.ShowDialog();
+            if (string.IsNullOrWhiteSpace(dialog.FileName))
+                return;
             var path = System.IO.Path.GetFileName(dialog.FileName);
             var image = new Classes.Image(path, Client.CurrentUser);
             image.Id = _imageInProgressId++;
@@ -392,9 +462,48 @@ namespace ChatProgram.Client
 
             File.Copy(dialog.FileName, image.Path, true);
             image.LoadImageIntoString();
+            CurrentlyUploadingSlices = image.Slices.Count;
             var packet = new Packet(PacketId.RequestUploadImage, image.ToJson());
             Client.Send(packet.ToString());
             Common.AddImage(image);
+        }
+
+        public bool UserHasSetScroll = false;
+
+        private void gbMessages_Scroll(object sender, ScrollEventArgs e)
+        {
+            UserHasSetScroll = true;
+            this.Text = $"{e.NewValue} {e.OldValue}";
+            int total = gbMessages.VerticalScroll.Value + gbMessages.VerticalScroll.LargeChange;
+            if(e.NewValue > e.OldValue)
+            {
+                UserHasSetScroll = total >= gbMessages.VerticalScroll.Maximum;
+            } else
+            {
+                UserHasSetScroll = true;
+            }
+            this.Text = $"{UserHasSetScroll}";
+        }
+
+        private void gbMessages_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.None)
+            {
+                int total = gbMessages.VerticalScroll.Value + gbMessages.VerticalScroll.LargeChange;
+                if(total >= gbMessages.VerticalScroll.Maximum)
+                {
+                    if(e.Delta < 0)
+                    {
+                        UserHasSetScroll = false;
+                    } else
+                    {
+                        UserHasSetScroll = true;
+                    }
+                } else
+                {
+                    UserHasSetScroll = true;
+                }
+            }
         }
     }
 }

@@ -15,6 +15,8 @@ namespace ChatProgram
         {
             var stackTrace = new StackTrace(1, true);
             string loc = null;
+            if (message.StartsWith("msg="))
+                loc = null;
             foreach(var stackFrame in stackTrace.GetFrames())
             {
                 if(!(stackFrame.GetFileName() ?? "Logger.cs").Contains("Logger.cs"))

@@ -23,6 +23,9 @@ namespace ChatProgram.Client
         public event EventHandler<Message> MessagedEdited;
         public event EventHandler<Image> NewImageUploaded;
 
+        public event EventHandler<UploadStatusEvent> UploadStatus;
+
+
         public event EventHandler<bool> SetMonitorState;
 
         public User CurrentUser;
@@ -111,6 +114,10 @@ namespace ChatProgram.Client
                     jobj["data"] = slice;
                     var pongPacket = new Packet(PacketId.ImageSlice, jobj);
                     Send(pongPacket.ToString());
+                    Form.Invoke(new Action(() =>
+                    {
+                        UploadStatus?.Invoke(this, new UploadStatusEvent(image, sliceNum));
+                    }));
                 }
             } else if(packet.Id == PacketId.ImageInitialInformation)
             {
@@ -120,7 +127,10 @@ namespace ChatProgram.Client
                 {
                     if(existingImage.Slices.Count == image.MaximumSlices)
                     { // We already have this image, so we dont need to download it
-                        NewImageUploaded?.Invoke(this, existingImage);
+                        Form.Invoke(new Action(() =>
+                        {
+                            NewImageUploaded?.Invoke(this, existingImage);
+                        }));
                         return;
                     }
                 }
@@ -138,10 +148,13 @@ namespace ChatProgram.Client
                 var content = packet.Information["data"].ToObject<string>();
                 if (Common.TryGetImage(id, out var image))
                 {
-                    image.Slices[sliceNum] = content;
+                    image.SetSlice(sliceNum, content);
                     if (done)
                     {
-                        NewImageUploaded?.Invoke(this, image);
+                        Form.Invoke(new Action(() =>
+                        {
+                            NewImageUploaded?.Invoke(this, image);
+                        }));
                     }
                     else
                     {
