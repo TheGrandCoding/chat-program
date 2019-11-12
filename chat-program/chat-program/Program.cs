@@ -42,9 +42,23 @@ namespace ChatProgram
             throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
+        public static string GetExternalIPAddress()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://icanhazip.com");
+            using(HttpClient client = new HttpClient())
+            {
+                var response = client.SendAsync(request).Result;
+                if(response.IsSuccessStatusCode)
+                {
+                    return response.Content.ReadAsStringAsync().Result.Trim();
+                }
+            }
+            return "0.0.0.0";
+        }
+
         public static string DefaultIP = "";
 
-        public const int Port = 8889;
+        public const int Port = 8888;
 
         /// <summary>
         /// The main entry point for the application.
@@ -56,6 +70,7 @@ namespace ChatProgram
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var th = new Thread(getServerDefaltIp);
+            th.SetApartmentState(ApartmentState.STA);
             th.Start();
             Application.Run(new Menu());
             while(Menu.Client != null || Menu.Server != null)

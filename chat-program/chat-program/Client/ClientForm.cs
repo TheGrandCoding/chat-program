@@ -87,21 +87,12 @@ namespace ChatProgram.Client
             }
         }
 
-        private ProgressBar tempProgressBar = null;
         private void Client_UploadStatus(object sender, UploadStatusEvent e)
         {
-            if(tempProgressBar == null)
-            {
-                tempProgressBar = new ProgressBar();
-                tempProgressBar.Location = txtMessage.Location;
-                tempProgressBar.Size = txtMessage.Size;
-                tempProgressBar.BringToFront();
-                this.Controls.Add(tempProgressBar);
-            }
-            tempProgressBar.Maximum = e.Maximum;
-            tempProgressBar.Value = e.Current;
-            tempProgressBar.Visible = e.Remaining > 0;
-            txtMessage.Visible = e.Remaining <= 0;
+            pbProgressBar.Maximum = e.Maximum;
+            pbProgressBar.Value = e.Current;
+            double percentage = (e.Current / e.Maximum) * 100;
+            pbProgressBar.Tag = $"Uploading image; {e.Current}/{e.Maximum} {Math.Round(percentage, 0)}%";
         }
 
         PictureBox getPictureBoxFor(Classes.Image image, ref int y)
@@ -143,6 +134,7 @@ namespace ChatProgram.Client
                 Client_UploadStatus(this, new UploadStatusEvent(e, e.MaximumSlices));
                 CurrentlyUploadingSlices = 0;
             }
+            CurrentlyUploadingSlices = 0;
             var lbl = getLabelFor(e, ref MESSAGE_Y);
             this.gbMessages.Controls.Add(lbl);
             MESSAGE_Y += lbl.Height;
@@ -276,7 +268,7 @@ namespace ChatProgram.Client
             lbl.Text = $"{message.Author.DisplayName}: {message.Content}";
             lbl.Tag = message;
             lbl.AutoSize = true;
-            lbl.MaximumSize = new Size(gbMessages.Size.Width - 15, 0);
+            lbl.MaximumSize = new Size(gbMessages.Size.Width - 45, 0);
             lbl.Location = new Point(5, y_offset);
             lbl.ContextMenu = new ContextMenu();
             lbl.ContextMenu.Tag = message;
@@ -370,9 +362,10 @@ namespace ChatProgram.Client
             this.gbMessages.Controls.Add(lbl);
             height = lbl.Height;
             MESSAGE_Y += height;
+            gbMessages.HorizontalScroll.Enabled = false;
             if(!UserHasSetScroll)
             {
-                gbMessages.VerticalScroll.Value = gbMessages.VerticalScroll.Maximum;
+                gbMessages.ScrollControlIntoView(lbl);
             }
         }
 
@@ -435,17 +428,18 @@ namespace ChatProgram.Client
 
         public static int CurrentlyUploadingSlices = 0;
 
+        [STAThread]
         private void btnUpload_Click(object sender, EventArgs e)
         {
             if (CurrentlyUploadingSlices > 0 && e != null)
                 return;
             var dialog = new OpenFileDialog();
-            dialog.InitialDirectory = "H:\\";
+            dialog.InitialDirectory = "C:\\";
             dialog.Title = "Select Image to Upload";
             dialog.Filter = "Image files|*.jpg;*.jpeg;*.png;*.gif;*.bmp";
             dialog.CheckFileExists = true;
             dialog.CheckPathExists = true;
-            dialog.ShowDialog();
+            dialog.ShowDialog(this);
             if (string.IsNullOrWhiteSpace(dialog.FileName))
                 return;
             var path = System.IO.Path.GetFileName(dialog.FileName);
@@ -463,7 +457,7 @@ namespace ChatProgram.Client
             File.Copy(dialog.FileName, image.Path, true);
             image.LoadImageIntoString();
             CurrentlyUploadingSlices = image.Slices.Count;
-            var packet = new Packet(PacketId.RequestUploadImage, image.ToJson());
+            var packet = new Packet(PacketId.RequestUploadImage, image.ToJson(true));
             Client.Send(packet.ToString());
             Common.AddImage(image);
         }
@@ -504,6 +498,14 @@ namespace ChatProgram.Client
                     UserHasSetScroll = true;
                 }
             }
+        }
+
+        private void pbProgressBar_MouseHover(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace((string)pbProgressBar.Tag))
+                pbProgressBar.Tag = $"Not currently downloading/uploading anything";
+            toolTip.ToolTipTitle = (string)pbProgressBar.Tag;
+            toolTip.Show((string)pbProgressBar.Tag, this, pbProgressBar.Location, 5000);
         }
     }
 }

@@ -103,6 +103,7 @@
             this.ShowInTaskbar = false;
             this.Text = "New Message";
             this.Activated += new System.EventHandler(this.NotificationForm_Activated);
+            this.Load += new System.EventHandler(this.NotificationForm_Load);
             this.LocationChanged += new System.EventHandler(this.NotificationForm_LocationChanged);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.NotificationForm_KeyDown);
             this.ResumeLayout(false);

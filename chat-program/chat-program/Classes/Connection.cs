@@ -54,6 +54,7 @@ namespace ChatProgram.Classes
             if(listenThread == null)
             {
                 listenThread = new Thread(listenLoop);
+                //listenThread.SetApartmentState(ApartmentState.STA);
                 listenThread.Start();
             }
         }

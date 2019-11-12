@@ -106,7 +106,7 @@ namespace ChatProgram.Client
                 {
                     if(shiftedId > 0)
                     { // move it into the new location, remove old one. 
-                        Common.Images[id] = image;
+                        Common.Images[shiftedId] = image;
                     }
                     var slice = image.Slices[sliceNum];
                     var jobj = new JObject(packet.Information);
@@ -163,6 +163,12 @@ namespace ChatProgram.Client
                         jobj["slice"] = sliceNum + 1;
                         var pongPacket = new Packet(PacketId.ImageNeedSlice, jobj);
                         Send(pongPacket.ToString());
+                        Form.Invoke(new Action(() =>
+                        {
+                            Form.pbProgressBar.Maximum = image.MaximumSlices;
+                            Form.pbProgressBar.Value = sliceNum;
+                            Form.pbProgressBar.Tag = $"Downloading image '{image.Name}'; {sliceNum}/{image.MaximumSlices} {((int)(sliceNum + 1 / image.MaximumSlices + 1))}";
+                        }));
                     }
                 }
             }

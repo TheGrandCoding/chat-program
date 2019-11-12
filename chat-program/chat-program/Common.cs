@@ -15,7 +15,7 @@ namespace ChatProgram
 
         public static Dictionary<uint, Image> Images = new Dictionary<uint, Image>();
 
-        static uint _imageIdNoTouchy = 0;
+        static uint _imageIdNoTouchy = 20;
 
         public static Random RND = new Random(DateTime.Now.Millisecond);
 

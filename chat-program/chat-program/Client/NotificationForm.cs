@@ -36,6 +36,7 @@ namespace ChatProgram.Client
         public NotificationForm(ClientForm form)
         {
             Client = form;
+            this.Owner = form;
             InitializeComponent();
         }
 
@@ -46,10 +47,13 @@ namespace ChatProgram.Client
             MESSAGE_ID = message.Id;
             lblFrom.Text = $"From {message.Author.DisplayName}";
             lblMessage.Text = message.Content;
+            txtReply.Text = "";
             timeoutTimer.Start();
             var loc = OpenLocation;
             this.SetDesktopLocation(loc.X, loc.Y);
             this.Show();
+            this.TopMost = true;
+            this.BringToFront();
         }
 
         private void txtReply_KeyDown(object sender, KeyEventArgs e)
@@ -117,6 +121,11 @@ namespace ChatProgram.Client
             {
                 this.Hide();
             }
+        }
+
+        private void NotificationForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

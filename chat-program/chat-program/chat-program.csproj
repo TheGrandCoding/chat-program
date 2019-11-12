@@ -129,6 +129,7 @@
     <Compile Include="Server\Commands\RandomModule.cs" />
     <Compile Include="Server\Commands\UserModule.cs" />
     <Compile Include="Server\ConnectionManager.cs" />
+    <Compile Include="Server\MLHandler.cs" />
     <Compile Include="Server\ServerForm.cs">
       <SubType>Form</SubType>
     </Compile>

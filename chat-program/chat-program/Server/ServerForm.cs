@@ -174,21 +174,13 @@ namespace ChatProgram.Server
             msg.Colour = Color.Blue;
             msg.Content = "Internal error occured when performing api POST.";
             try
-            { 
-                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
-                var ip = Program.GetIPAddress();
-                using(HttpClient client = new HttpClient())
+            {
+                msg.Content = MLHandler.SendServerStart("Chat Server");
+                if (msg.Content.StartsWith("Error:") == false)
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, $"{Program.APIBASE}/chat/ip?value={ip}&token={token}");
-                    var response = client.SendAsync(request).Result;
-                    if(response.IsSuccessStatusCode)
-                    {
-                        msg.Content = $"API reports IP was correctly set.";
-                    } else
-                    {
-                        msg.Colour = Color.DarkCyan;
-                        msg.Content = $"API reports error: {response.StatusCode} :: {response.Content.ReadAsStringAsync().Result}";
-                    }
+                    masterlistTimer.Enabled = true;
+                    masterlistTimer.Interval = 1000;// * 60 * 5;
+                    masterlistTimer.Start();
                 }
             } catch (Exception ex)
             {
@@ -229,6 +221,11 @@ namespace ChatProgram.Server
         }
 
         const int WM_SYSCOMMAND = 0x0112, SC_MONITORPOWER = 0xF170;
+
+        private void masterlistTimer_Tick(object sender, EventArgs e)
+        {
+            MLHandler.SetPlayerCount(Server.PlayerCount);
+        }
 
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {

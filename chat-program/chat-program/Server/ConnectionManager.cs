@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -22,6 +23,12 @@ namespace ChatProgram.Server
         public TcpListener Server = new TcpListener(IPAddress.Any, Program.Port);
 
         Dictionary<uint, Connection> Connections = new Dictionary<uint, Connection>();
+
+        public int PlayerCount {  get
+            {
+                lock (Connections)
+                    return Connections.Count;
+            } }
 
         /// <summary>
         /// Client has sent this <see cref="Message"/> to be broadcasted
@@ -185,7 +192,14 @@ namespace ChatProgram.Server
                         Logger.LogMsg($"From {user.UserName}({user.Id}): {e}");
                         Form.Invoke(new Action(() => {
                             var packet = new Packet(e);
-                            HandleConnMessage(connection, user, packet);
+                            try
+                            {
+                                HandleConnMessage(connection, user, packet);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.LogMsg($"{ex}", LogSeverity.Error);
+                            }
                         }));
                     } else
                     {
@@ -286,12 +300,24 @@ namespace ChatProgram.Server
             {
                 var image = new Classes.Image();
                 image.FromJson(packet.Information);
-                if((Menu.Client?.Client?.CurrentUser?.Id ?? (uint)0) != user.Id)
-                    Common.AddImage(image);
+                if((Menu.Client?.Client?.CurrentUser?.Id ?? (uint)0) == user.Id)
+                { // Local user, so no need to upload image (since its already there)
+                    if(Common.TryGetImage(image.Id, out var old))
+                    {
+                        Common.Images.Remove(image.Id);
+                        old.Id = Common.IterateImageId();
+                        Common.AddImage(old);
+                        image = old;
+                    }
+                    var otherPacket = new Packet(PacketId.ImageInitialInformation, image.ToJson(true));
+                    Broadcast(otherPacket);
+                    return;
+                }
                 var jobj = new JObject();
                 jobj["slice"] = 0;
                 jobj["originalId"] = image.Id;
-                image.Id = Common.IterateMessageId();
+                image.Id = Common.IterateImageId();
+                Common.AddImage(image);
                 jobj["id"] = image.Id;
                 var pongPacket = new Packet(PacketId.ImageNeedSlice, jobj);
                 SendTo(user, pongPacket);
@@ -303,9 +329,20 @@ namespace ChatProgram.Server
                 var content = packet.Information["data"].ToObject<string>();
                 if(Common.TryGetImage(id, out var image))
                 {
-                    image.Slices[sliceNum] = content;
+                    image.SetSlice(sliceNum, content);
                     if(done)
                     {
+                        var loadedImage = System.Drawing.Image.FromStream(image.GetStream());
+                        string[] pathDirs = image.Path.Split('/');
+                        pathDirs = pathDirs.Reverse().Skip(1).Reverse().ToArray();
+                        string temp = "";
+                        foreach(var path in pathDirs)
+                        {
+                            temp += path + "/";
+                            if (!Directory.Exists(temp))
+                                Directory.CreateDirectory(temp);
+                        }
+                        loadedImage.Save(image.Path);
                         var otherPacket = new Packet(PacketId.ImageInitialInformation, image.ToJson(true));
                         Broadcast(otherPacket);
                     } else

@@ -100,6 +100,10 @@ namespace ChatProgram.Classes
 
         public void SetSlice(int index, string content)
         {
+            if (Slices == null)
+                Slices = new Dictionary<int, string>();
+            if (ImageB64String == null)
+                ImageB64String = "";
             Slices[index] = content;
             string temp = string.Join("", Slices.Values);
             if (temp.Length > ImageB64String.Length)
