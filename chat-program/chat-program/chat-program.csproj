@@ -89,6 +89,7 @@
     </Compile>
     <Compile Include="Classes\Image.cs" />
     <Compile Include="Classes\Message.cs" />
+    <Compile Include="Classes\MLServer.cs" />
     <Compile Include="Classes\Packet.cs" />
     <Compile Include="Classes\UploadStatusEvent.cs" />
     <Compile Include="Classes\User.cs" />

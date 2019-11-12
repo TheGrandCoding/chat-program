@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ChatProgram.Classes;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -28,6 +30,8 @@ namespace ChatProgram
         }
 
         public static bool IsServer { get; set; } = false;
+
+        public static IPAddress SelfExternalIP { get; set; }
 
         public static string GetIPAddress()
         {
@@ -86,16 +90,27 @@ namespace ChatProgram
 			System.Threading.Thread.Sleep(500); // wait for menu to load
             try
             {
+                SelfExternalIP = IPAddress.Parse(GetExternalIPAddress());
                 using (HttpClient client = new HttpClient())
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Get, $"{APIBASE}/chat/ip");
+                    client.DefaultRequestHeaders.Add("User-Agent", "ChromeNotChromeLmao");
+                    var request = new HttpRequestMessage(HttpMethod.Get, $"{APIBASE}/masterlist/list?type=chatprogram");
                     var response = client.SendAsync(request).Result;
                     if (response.IsSuccessStatusCode)
                     {
                         string text = response.Content.ReadAsStringAsync().Result;
-                        if (IPAddress.TryParse(text, out var addr))
+                        var servers = JsonConvert.DeserializeObject<List<MLServer>>(text);
+                        foreach(var server in servers)
                         {
-                            DefaultIP = addr.ToString();
+                            if (server.ExternalIP != SelfExternalIP.ToString())
+                                continue;
+                            if (server.InternalIP == GetIPAddress())
+                                server.InternalIP = "127.0.0.1";
+                            var row = new string[] { server.Name, server.CurrentPlayers.ToString(), $"{server.InternalIP}" };
+                            Menu.INSTANCE.Invoke(new Action(() =>
+                            {
+                                Menu.INSTANCE.dgvServers.Rows.Add(row);
+                            }));
                         }
                     } else
                     {

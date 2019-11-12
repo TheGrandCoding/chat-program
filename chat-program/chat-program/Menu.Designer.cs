@@ -28,52 +28,85 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnJoin = new System.Windows.Forms.Button();
             this.btnHost = new System.Windows.Forms.Button();
+            this.dgvServers = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvServers)).BeginInit();
             this.SuspendLayout();
-            // 
-            // btnJoin
-            // 
-            this.btnJoin.Location = new System.Drawing.Point(16, 15);
-            this.btnJoin.Margin = new System.Windows.Forms.Padding(4);
-            this.btnJoin.Name = "btnJoin";
-            this.btnJoin.Size = new System.Drawing.Size(236, 85);
-            this.btnJoin.TabIndex = 0;
-            this.btnJoin.Text = "Join a Text Server";
-            this.btnJoin.UseVisualStyleBackColor = true;
-            this.btnJoin.Click += new System.EventHandler(this.btnJoin_Click);
             // 
             // btnHost
             // 
-            this.btnHost.Location = new System.Drawing.Point(16, 107);
-            this.btnHost.Margin = new System.Windows.Forms.Padding(4);
+            this.btnHost.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnHost.Location = new System.Drawing.Point(0, 307);
             this.btnHost.Name = "btnHost";
-            this.btnHost.Size = new System.Drawing.Size(236, 85);
+            this.btnHost.Size = new System.Drawing.Size(574, 29);
             this.btnHost.TabIndex = 1;
             this.btnHost.Text = "Host a Server";
             this.btnHost.UseVisualStyleBackColor = true;
             this.btnHost.Click += new System.EventHandler(this.btnHost_Click);
             // 
+            // dgvServers
+            // 
+            this.dgvServers.AllowUserToAddRows = false;
+            this.dgvServers.AllowUserToDeleteRows = false;
+            this.dgvServers.AllowUserToResizeColumns = false;
+            this.dgvServers.AllowUserToResizeRows = false;
+            this.dgvServers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvServers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvServers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column1,
+            this.Column2,
+            this.Column3});
+            this.dgvServers.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvServers.Location = new System.Drawing.Point(0, 0);
+            this.dgvServers.Name = "dgvServers";
+            this.dgvServers.RowHeadersVisible = false;
+            this.dgvServers.Size = new System.Drawing.Size(574, 307);
+            this.dgvServers.TabIndex = 2;
+            this.dgvServers.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvServers_CellMouseDoubleClick);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "Name";
+            this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "Players";
+            this.Column2.Name = "Column2";
+            this.Column2.ReadOnly = true;
+            // 
+            // Column3
+            // 
+            this.Column3.HeaderText = "IP";
+            this.Column3.Name = "Column3";
+            this.Column3.ReadOnly = true;
+            // 
             // Menu
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(268, 206);
+            this.ClientSize = new System.Drawing.Size(574, 336);
+            this.Controls.Add(this.dgvServers);
             this.Controls.Add(this.btnHost);
-            this.Controls.Add(this.btnJoin);
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Menu";
             this.Text = "Chat Program";
             this.Activated += new System.EventHandler(this.Menu_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Menu_FormClosing);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvServers)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Button btnJoin;
         private System.Windows.Forms.Button btnHost;
+        public System.Windows.Forms.DataGridView dgvServers;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
     }
 }
 

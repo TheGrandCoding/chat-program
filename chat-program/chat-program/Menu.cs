@@ -61,7 +61,6 @@ namespace ChatProgram
         public void ButtonRefresh()
         {
             btnHost.Enabled = Server == null;
-            btnJoin.Enabled = Client == null && !string.IsNullOrWhiteSpace(Program.DefaultIP);
         }
 
         private void Menu_Activated(object sender, EventArgs e)
@@ -75,6 +74,28 @@ namespace ChatProgram
             {
                 e.Cancel = true;
                 this.Hide();
+            }
+        }
+
+        private void dgvServers_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.ColumnIndex < 0 || e.RowIndex < 0)
+                return;
+            var row = dgvServers.Rows[e.RowIndex];
+            var cell = row.Cells[2];
+            if(IPAddress.TryParse(cell.Value.ToString(), out var ip))
+            {
+                Client = new Client.ClientForm();
+                if (Client.Connect(ip))
+                {
+                    Client.Show();
+                    this.Hide();
+                }
+                else
+                {
+                    Client.Close();
+                    Client = null;
+                }
             }
         }
     }
