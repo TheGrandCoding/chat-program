@@ -354,7 +354,7 @@ namespace ChatProgram.Server
                         SendTo(user, pongPacket);
                     }
                 }
-            } else if(packet.Id == PacketId.ImageNeedSlice)
+            } else if(packet.Id == PacketId.ImageNeedSlice) 
             {
                 var id = packet.Information["id"].ToObject<uint>();
                 var sliceNum = packet.Information["slice"].ToObject<int>();
@@ -367,6 +367,12 @@ namespace ChatProgram.Server
                     var pongPacket = new Packet(PacketId.ImageSlice, jobj);
                     SendTo(user, pongPacket);
                 }
+            } else if(packet.Id == PacketId.NeedUserInfo)
+            {
+                var id = packet.Information["id"].ToObject<uint>();
+                var usr = Common.GetUser(id);
+                var pong = new Packet(PacketId.RespondUserInfo, usr.ToJson());
+                SendTo(user, pong);
             }
         }
 

@@ -102,6 +102,10 @@ namespace ChatProgram.Classes
         /// Image slice responded to by request
         /// </summary>
         ImageSlice,
+        /// <summary>
+        /// Server is providing <see cref="User"/> information to Client
+        /// </summary>
+        RespondUserInfo,
         // -----------------------------
         // ---- From-Client Packets ----
         // -----------------------------
@@ -133,6 +137,10 @@ namespace ChatProgram.Classes
         /// <summary>
         /// Sends the Server a slice of the Image.
         /// </summary>
-        UploadImageSlice
+        UploadImageSlice,
+        /// <summary>
+        /// Sends the Server indicating that it needs a <see cref="User"/> cache
+        /// </summary>
+        NeedUserInfo
     }
 }

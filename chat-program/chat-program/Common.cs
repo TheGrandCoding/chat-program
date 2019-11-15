@@ -92,7 +92,8 @@ namespace ChatProgram
             if(!Program.IsServer) // server should populate above list, so should always be able to get it
             {
             }
-            return null;
+
+
         }
 
         public static User GetUser(uint id)

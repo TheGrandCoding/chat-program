@@ -22,8 +22,9 @@ namespace ChatProgram.Client
         public event EventHandler<uint> MessageDeleted;
         public event EventHandler<Message> MessagedEdited;
         public event EventHandler<Image> NewImageUploaded;
-
         public event EventHandler<UploadStatusEvent> UploadStatus;
+
+        ManualResetEvent UserRespondWait = new ManualResetEvent(false);
 
 
         public event EventHandler<bool> SetMonitorState;
@@ -34,6 +35,14 @@ namespace ChatProgram.Client
         {
             Form = form;
             base.Receieved += parseJson;
+        }
+
+        public void GetUserFromServer(uint id)
+        {
+            var jobj = new JObject();
+            jobj["id"]
+            var packet = new Packet(PacketId.NeedUserInfo, )
+            Send()
         }
 
         void parseJson(object sender, string json)
